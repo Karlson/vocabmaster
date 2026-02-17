@@ -106,7 +106,9 @@ const LC={1:{bg:'from-green-400 to-emerald-500',t:'text-green-400',b:'bg-green-5
 function loadState(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){return{}}}
 function saveState(s){localStorage.setItem(LS_KEY,JSON.stringify(s))}
 
+let soundOn = localStorage.getItem('vm_sound') !== 'off';
 let state={wP:loadState(),st:{c:0,w:0,s:0,b:0},sc:'levels',cL:1,cI:0,sA:false,sH:false,sQ:[],sR:[],sM:null,cu:null};
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('vm_sound',soundOn?'on':'off');render()}
 
 function gW(l,i){return state.wP[l+'-'+i]||{c:0,w:0}}
 function gP(l){const w=DB[l]||[];return w.length?w.filter((_,i)=>gW(l,i).c>=MC).length/w.length:0}
@@ -142,13 +144,16 @@ let touchX=0;
 
 // === SPEECH ===
 function speak(text, lang='en-US') {
+  if (!soundOn || !('speechSynthesis' in window)) return;
+  doSpeak(text, lang);
+}
+function doSpeak(text, lang='en-US') {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang;
   u.rate = 0.85;
   u.pitch = 1;
-  // Try to find a good English voice
   const voices = window.speechSynthesis.getVoices();
   const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
     || voices.find(v => v.lang.startsWith('en') && !v.localService)
@@ -195,7 +200,8 @@ function render(){
       ${u&&pr<1?`<div class="text-xs text-slate-500 mt-1">🔄${s.p} 🆕${s.n}</div>`:''}</div></div></button>`;
     }
     a.innerHTML=`<div style="min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)" class="p-4"><div class="max-w-md mx-auto">
-    <div class="text-center mb-5"><h1 class="text-3xl font-bold text-white mb-1">📚 VocabMaster</h1><p class="text-slate-400 text-sm">${tW} слов — 5 уровней</p></div>
+    <div class="text-center mb-5 relative"><h1 class="text-3xl font-bold text-white mb-1">📚 VocabMaster</h1><p class="text-slate-400 text-sm">${tW} слов — 5 уровней</p>
+    <button onclick="toggleSound()" class="absolute top-0 right-0 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Звук">${soundOn?'🔊':'🔇'}</button></div>
     <div class="bg-slate-800 rounded-xl p-4 mb-5"><div class="grid grid-cols-4 gap-2 text-center">
     <div><div class="text-xl font-bold text-white">${tM}</div><div class="text-xs text-slate-400">Освоено</div></div>
     <div><div class="text-xl font-bold text-white">${tW-tM}</div><div class="text-xs text-slate-400">Осталось</div></div>
@@ -213,14 +219,14 @@ function render(){
     const pr=gW(cW.lv,cW.i),c=LC[state.cL],pct=((state.cI+1)/state.sQ.length)*100;
     const dots=Array.from({length:MC}).map((_,i)=>`<div class="w-2.5 h-2.5 rounded-full ${i<pr.c?'bg-green-400':'bg-slate-600'}"></div>`).join('');
     a.innerHTML=`<div id="study-wrap" style="min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)" class="p-4"><div class="max-w-md mx-auto">
-    <div class="flex items-center justify-between mb-4"><button onclick="state.sc='levels';render()" class="text-slate-400 text-sm">←</button><div class="text-sm font-semibold ${c.t}">Ур.${state.cL}</div><div class="text-slate-400 text-sm">${state.cI+1}/${state.sQ.length}</div></div>
+    <div class="flex items-center justify-between mb-4"><button onclick="state.sc='levels';render()" class="text-slate-400 text-sm">←</button><div class="text-sm font-semibold ${c.t}">Ур.${state.cL}</div><div class="flex items-center gap-3"><button onclick="toggleSound()" class="text-lg opacity-70 hover:opacity-100">${soundOn?'🔊':'🔇'}</button><span class="text-slate-400 text-sm">${state.cI+1}/${state.sQ.length}</span></div></div>
     <div class="h-1.5 bg-slate-700 rounded-full mb-5 overflow-hidden"><div class="h-full ${c.b} rounded-full" style="width:${pct}%"></div></div>
     ${state.st.s>=3?`<div class="text-center mb-3"><span class="text-amber-400 text-sm">🔥${state.st.s}</span></div>`:''}
     <div id="card" class="rounded-2xl p-6 text-center bg-slate-800">
     <div class="flex justify-center gap-1 mb-3">${dots}${pr.c>=MC?'<span class="text-green-400 text-xs ml-1">⭐</span>':''}</div>
     <div class="text-4xl font-bold text-white mb-1">${cW.w}</div>
-    <button onclick="speak('${cW.w}')" class="text-blue-400 hover:text-blue-300 text-2xl mb-1 active:scale-90 transition-transform" title="Listen">🔊</button>
-    <div class="text-slate-400 text-sm italic mb-4">${cW.ex} <button onclick="speak('${cW.ex.replace(/'/g,"\\'")}')" class="text-blue-400 hover:text-blue-300 text-xs ml-1">🔈</button></div>
+    <button onclick="doSpeak('${cW.w}')" class="text-blue-400 hover:text-blue-300 text-2xl mb-1 active:scale-90 transition-transform" title="Listen">🔊</button>
+    <div class="text-slate-400 text-sm italic mb-4">${cW.ex} <button onclick="doSpeak('${cW.ex.replace(/'/g,"\\'")}')" class="text-blue-400 hover:text-blue-300 text-xs ml-1">🔈</button></div>
     ${!state.sA&&!state.sH?`<button onclick="state.sH=true;render()" class="text-amber-400 text-xs mb-4 hover:underline block mx-auto">💡 Подсказка</button>`:''}
     ${state.sH&&!state.sA?`<div class="bg-amber-900/30 rounded-lg px-3 py-2 mb-4"><span class="text-amber-300 text-sm">💡 ${cW.h}</span></div>`:''}
     ${!state.sA?`<button onclick="state.sA=true;render()" class="w-full py-3 rounded-xl bg-gradient-to-r ${c.bg} text-white font-semibold text-lg shadow-lg active:scale-95">Показать</button>`:
