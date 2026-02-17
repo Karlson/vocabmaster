@@ -28,41 +28,6 @@ A progressive vocabulary learning PWA with spaced repetition, 900+ English-Russi
 2. Tap **⋮** (three dots menu)
 3. Select **"Add to Home Screen"**
 
-## 🚀 Deploy Your Own
-
-### GitHub Pages (free)
-
-```bash
-git clone https://github.com/YOUR_USER/vocabmaster.git
-cd vocabmaster
-# edit files if needed
-git add .
-git commit -m "update"
-git push
-```
-
-Then go to **Settings → Pages → Source: main → Save**.
-
-Your app will be live at `https://YOUR_USER.github.io/vocabmaster/`
-
-### Vercel (free)
-
-1. Push repo to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import the repository
-4. Click Deploy
-
-## 📁 Project Structure
-
-```
-vocabmaster/
-├── index.html        # Main app (HTML + JS + CSS, all-in-one)
-├── manifest.json     # PWA manifest
-├── sw.js             # Service Worker for offline caching
-├── icon-192.png      # App icon (192x192)
-├── icon-512.png      # App icon (512x512)
-└── README.md
-```
 
 ## 🎯 How It Works
 
