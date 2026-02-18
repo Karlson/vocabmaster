@@ -13,20 +13,22 @@
 <style>
 *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;overscroll-behavior:none}
-.anim-g{animation:ag .4s}
-.anim-r{animation:ar .4s}
-@keyframes ag{0%{transform:scale(1)}50%{transform:scale(1.05);background:rgba(34,197,94,.2)}100%{transform:scale(1)}}
-@keyframes ar{0%{transform:scale(1)}50%{transform:scale(.95);background:rgba(239,68,68,.2)}100%{transform:scale(1)}}
-.bounce{animation:bounce 1s infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ag{animation:ag .4s}.ar{animation:ar .4s}
+@keyframes ag{50%{transform:scale(1.05);background:rgba(34,197,94,.2)}}
+@keyframes ar{50%{transform:scale(.95);background:rgba(239,68,68,.2)}}
+.bounce{animation:bn 1s infinite}@keyframes bn{50%{transform:translateY(-8px)}}
+textarea,input,select{background:#1e293b;color:#fff;border:1px solid #334155;border-radius:8px;padding:8px 12px;width:100%;font-size:14px;outline:none}
+textarea:focus,input:focus{border-color:#6366f1}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:12px;font-weight:600;z-index:999;animation:fo 2.5s forwards}
+@keyframes fo{0%,70%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app"></div><div id="tc"></div>
 <script>
-// === WORD DATABASE ===
+// === WORDS ===
 const W=(w,t,e,h)=>[w,t,e,h];
-const DB={1:[
+const BI={1:[
 W("cat","кот","The cat sleeps.","животное"),W("dog","собака","I have a dog.","животное"),W("house","дом","My house.","жильё"),W("water","вода","Drink water.","H2O"),W("food","еда","Good food.","питание"),W("book","книга","Read a book.","знания"),W("sun","солнце","Bright sun.","звезда"),W("happy","счастливый","I am happy.","радость"),W("big","большой","Big tree.","не small"),W("small","маленький","Small bird.","не big"),
 W("run","бежать","I run daily.","быстро"),W("eat","есть","Eat breakfast.","пища"),W("red","красный","Red apple.","цвет"),W("green","зелёный","Green grass.","цвет"),W("time","время","What time?","часы"),W("love","любовь","I love you.","чувство"),W("good","хороший","Good morning!","не bad"),W("bad","плохой","Bad weather.","не good"),W("new","новый","New car.","не old"),W("old","старый","Old man.","не new"),
 W("boy","мальчик","Young boy.","ребёнок"),W("girl","девочка","Little girl.","ребёнок"),W("man","мужчина","Tall man.","взрослый"),W("woman","женщина","Kind woman.","взрослая"),W("tree","дерево","Tall tree.","лес"),W("fish","рыба","I like fish.","вода"),W("milk","молоко","Cold milk.","напиток"),W("bread","хлеб","Fresh bread.","еда"),W("hand","рука","My hand.","тело"),W("head","голова","Head hurts.","тело"),
@@ -34,236 +36,1411 @@ W("eye","глаз","Blue eyes.","видеть"),W("door","дверь","Open door
 W("friend","друг","Best friend.","близкий"),W("mother","мать","My mother.","мама"),W("father","отец","My father.","папа"),W("sister","сестра","Little sister.","семья"),W("brother","брат","Older brother.","семья"),W("child","ребёнок","Happy child.","маленький"),W("name","имя","Your name?","зовут"),W("city","город","Big city.","место"),W("room","комната","Clean room.","дом"),W("table","стол","On the table.","мебель"),
 W("chair","стул","Sit on chair.","мебель"),W("window","окно","Open window.","стекло"),W("money","деньги","Have money.","платить"),W("school","школа","Go to school.","учёба"),W("year","год","This year.","время"),W("day","день","Nice day.","светло"),W("night","ночь","Good night.","темно"),W("morning","утро","Good morning.","начало дня"),W("buy","покупать","Buy a gift.","тратить"),W("give","давать","Give me.","передать"),
 W("take","брать","Take it.","взять"),W("come","приходить","Come here.","сюда"),W("go","идти","Let us go.","туда"),W("see","видеть","I see you.","глаза"),W("know","знать","I know.","информация"),W("want","хотеть","I want.","желание"),W("think","думать","I think so.","мозг"),W("say","говорить","Say hello.","слова"),W("help","помощь","Help me.","поддержка"),W("open","открывать","Open box.","не close"),
-W("close","закрывать","Close door.","не open"),W("fast","быстрый","Fast runner.","не slow"),W("slow","медленный","Slow turtle.","не fast"),W("clean","чистый","Clean water.","не dirty"),W("easy","лёгкий","Easy task.","не hard"),W("young","молодой","Young man.","не old"),W("long","длинный","Long road.","не short"),W("short","короткий","Short story.","не long"),W("light","свет","Turn on light.","яркость"),W("dark","тёмный","Dark room.","не light"),
-W("begin","начинать","Begin lesson.","старт"),W("end","конец","The end.","финиш"),W("write","писать","Write letter.","ручка"),W("read","читать","Read book.","текст"),W("play","играть","Play game.","развлечение"),W("sing","петь","Sing song.","голос"),W("dance","танцевать","Dance with me.","музыка"),W("sit","сидеть","Sit down.","стул"),W("stand","стоять","Stand up.","ноги"),W("walk","ходить","Walk slowly.","пешком"),
-W("talk","разговаривать","Talk to me.","беседа"),W("listen","слушать","Listen to me.","уши"),W("wait","ждать","Wait for me.","терпение"),W("answer","ответ","Answer me.","вопрос"),W("ask","спрашивать","Ask question.","вопрос"),W("smile","улыбка","Nice smile.","лицо"),W("cry","плакать","Do not cry.","слёзы"),W("fly","летать","Birds fly.","небо"),W("swim","плавать","I can swim.","вода"),W("drive","водить","Drive car.","руль"),
-W("cook","готовить","Cook dinner.","кухня"),W("wash","мыть","Wash hands.","вода"),W("wear","носить","Wear hat.","одежда"),W("blue","синий","Blue sky.","цвет"),W("yellow","жёлтый","Yellow sun.","цвет"),W("flower","цветок","Nice flower.","растение"),W("bird","птица","Small bird.","летает"),W("horse","лошадь","Fast horse.","скачет"),W("river","река","Long river.","течёт"),W("sea","море","Blue sea.","вода"),
-W("snow","снег","White snow.","зима"),W("wind","ветер","Strong wind.","дует"),W("fire","огонь","Warm fire.","горит"),W("garden","сад","Green garden.","растения"),W("road","дорога","Long road.","путь"),W("bridge","мост","Cross bridge.","через реку"),W("cloud","облако","White cloud.","небо"),W("star","звезда","Bright star.","ночь"),W("king","король","King rules.","монарх"),W("queen","королева","Queen smiled.","монархиня"),
-W("song","песня","Nice song.","мелодия"),W("story","история","Funny story.","рассказ"),W("game","игра","Fun game.","играть"),W("dream","мечта","Follow dream.","желание"),W("heart","сердце","Kind heart.","орган"),W("voice","голос","Loud voice.","звук"),W("face","лицо","Happy face.","голова"),W("ear","ухо","My ears.","слышать"),W("nose","нос","Long nose.","дышать"),W("arm","рука","Raise arm.","тело"),
-W("leg","нога","Strong leg.","тело"),W("cup","чашка","Cup of tea.","посуда"),W("plate","тарелка","Clean plate.","посуда"),W("knife","нож","Sharp knife.","режет"),W("key","ключ","My key.","дверь"),W("phone","телефон","Phone rang.","звонить"),W("bed","кровать","Go to bed.","спать"),W("floor","пол","Clean floor.","внизу"),W("wall","стена","White wall.","дом"),W("bag","сумка","Heavy bag.","нести"),
-W("egg","яйцо","Boiled egg.","еда"),W("rice","рис","Boil rice.","крупа"),W("meat","мясо","Eat meat.","еда"),W("sugar","сахар","Sweet sugar.","сладкий"),W("salt","соль","Add salt.","солёный"),W("cheese","сыр","Yellow cheese.","молочный"),W("apple","яблоко","Red apple.","фрукт"),W("tea","чай","Hot tea.","напиток"),W("coffee","кофе","Black coffee.","напиток"),W("juice","сок","Orange juice.","напиток"),
-],
-2:[
+W("close","закрывать","Close door.","не open"),W("fast","быстрый","Fast runner.","не slow"),W("slow","медленный","Slow turtle.","не fast"),W("clean","чистый","Clean water.","не dirty"),W("easy","лёгкий","Easy task.","не hard"),W("young","молодой","Young man.","не old"),W("long","длинный","Long road.","не short"),W("short","короткий","Short story.","не long"),W("write","писать","Write letter.","ручка"),W("read","читать","Read book.","текст"),
+W("play","играть","Play game.","развлечение"),W("sit","сидеть","Sit down.","стул"),W("stand","стоять","Stand up.","ноги"),W("walk","ходить","Walk slowly.","пешком"),W("listen","слушать","Listen to me.","уши"),W("wait","ждать","Wait for me.","терпение"),W("smile","улыбка","Nice smile.","лицо"),W("fly","летать","Birds fly.","небо"),W("swim","плавать","I can swim.","вода"),W("drive","водить","Drive car.","руль"),
+W("cook","готовить","Cook dinner.","кухня"),W("wash","мыть","Wash hands.","вода"),W("blue","синий","Blue sky.","цвет"),W("flower","цветок","Nice flower.","растение"),W("bird","птица","Small bird.","летает"),W("river","река","Long river.","течёт"),W("sea","море","Blue sea.","вода"),W("snow","снег","White snow.","зима"),W("fire","огонь","Warm fire.","горит"),W("star","звезда","Bright star.","ночь"),
+W("song","песня","Nice song.","мелодия"),W("heart","сердце","Kind heart.","орган"),W("face","лицо","Happy face.","голова"),W("ear","ухо","My ears.","слышать"),W("leg","нога","Strong leg.","тело"),W("cup","чашка","Cup of tea.","посуда"),W("key","ключ","My key.","дверь"),W("bed","кровать","Go to bed.","спать"),W("egg","яйцо","Boiled egg.","еда"),W("apple","яблоко","Red apple.","фрукт"),W("tea","чай","Hot tea.","напиток"),W("coffee","кофе","Black coffee.","напиток"),
+],2:[
 W("weather","погода","Nice weather.","дождь/солнце"),W("kitchen","кухня","In kitchen.","комната"),W("believe","верить","I believe.","доверять"),W("usually","обычно","Usually at 7.","как правило"),W("already","уже","Already eaten.","к моменту"),W("between","между","Sit between.","посередине"),W("different","различный","They differ.","не одинаковый"),W("important","важный","Very important.","значение"),W("together","вместе","Go together.","не отдельно"),W("mountain","гора","Tall mountain.","высота"),
-W("beautiful","красивый","Beautiful sunset.","не ugly"),W("remember","помнить","I remember.","не забыть"),W("perhaps","возможно","Perhaps rain.","может быть"),W("journey","путешествие","Long journey.","поездка"),W("difficult","трудный","Difficult task.","не лёгкий"),W("explain","объяснять","Please explain.","понятно"),W("receive","получать","Received letter.","не отправить"),W("several","несколько","Several people.","больше двух"),W("prepare","готовиться","Prepare exam.","заранее"),W("enough","достаточно","Enough.","хватит"),
-W("toward","к","Walk toward.","направление"),W("achieve","достигать","Achieve goals.","добиться"),W("trouble","проблема","In trouble.","неприятность"),W("suddenly","внезапно","Suddenly rained.","неожиданно"),W("although","хотя","Although rained.","несмотря"),W("honest","честный","Be honest.","не лживый"),W("provide","предоставлять","Provide ID.","обеспечить"),W("strength","сила","Inner strength.","мощь"),W("imagine","представлять","Imagine world.","фантазия"),W("destroy","разрушать","Do not destroy.","уничтожить"),
-W("contain","содержать","Contains books.","включать"),W("favorite","любимый","Favorite movie.","нравится"),W("promise","обещание","I promise.","слово"),W("among","среди","Among friends.","окружение"),W("average","средний","Average score.","середина"),W("beneath","под","Beneath surface.","снизу"),W("beyond","за пределами","Beyond horizon.","дальше"),W("curious","любопытный","Curious child.","узнать"),W("escape","побег","Escape prison.","сбежать"),W("increase","увеличивать","Increase volume.","больше"),
-W("accept","принимать","Accept offer.","согласиться"),W("advice","совет","Good advice.","рекомендация"),W("allow","позволять","Allow me.","разрешить"),W("ancient","древний","Ancient city.","старый"),W("attend","посещать","Attend meeting.","присутствовать"),W("borrow","брать взаймы","Borrow book.","временно"),W("bright","яркий","Bright star.","сияющий"),W("calm","спокойный","Stay calm.","не волнение"),W("cause","причина","The cause.","источник"),W("certain","определённый","I am certain.","уверенный"),
-W("compare","сравнивать","Compare two.","отличия"),W("consider","рассматривать","Consider option.","обдумать"),W("create","создавать","Create new.","с нуля"),W("depend","зависеть","Depends on.","обусловлено"),W("develop","развивать","Develop skill.","совершенствовать"),W("discover","обнаруживать","Discover secret.","найти"),W("during","во время","During night.","в течение"),W("effort","усилие","Make effort.","стараться"),W("entire","целый","Entire day.","весь"),W("especially","особенно","Especially you.","прежде всего"),
-W("excellent","отличный","Excellent work!","превосходный"),W("feature","особенность","Key feature.","характеристика"),W("foreign","иностранный","Foreign country.","зарубежный"),W("gather","собирать","Gather info.","накапливать"),W("gentle","нежный","Gentle touch.","мягкий"),W("improve","улучшать","Improve skills.","лучше"),W("instead","вместо","Use instead.","замена"),W("mention","упоминать","Do not mention.","мимоходом"),W("narrow","узкий","Narrow street.","не широкий"),W("notice","замечать","I noticed.","внимание"),
-W("operate","управлять","Operate machine.","действие"),W("opinion","мнение","My opinion.","взгляд"),W("patient","терпеливый","Be patient.","ждать"),W("pleasure","удовольствие","With pleasure.","наслаждение"),W("protect","защищать","Protect nature.","охранять"),W("purpose","цель","On purpose.","намерение"),W("remain","оставаться","Remain seated.","не уходить"),W("require","требовать","Requires time.","нуждаться"),W("search","искать","Search answers.","разыскивать"),W("similar","похожий","Look similar.","напоминающий"),
-W("suggest","предлагать","I suggest.","совет"),W("survive","выживать","Survive storm.","живым"),W("taste","вкус","Good taste.","еда"),W("touch","трогать","Do not touch.","касаться"),W("prevent","предотвращать","Prevent mistake.","не допустить"),W("rare","редкий","Rare flower.","не частый"),W("realize","осознавать","I realized.","понять"),W("reduce","уменьшать","Reduce costs.","не увеличить"),W("regret","сожалеть","No regrets.","жалеть"),W("repeat","повторять","Repeat after.","ещё раз"),
-W("replace","заменять","Replace battery.","новое"),W("respect","уважение","Show respect.","почтение"),W("respond","отвечать","Respond quickly.","реагировать"),W("result","результат","Good result.","итог"),W("separate","отдельный","Separate rooms.","разделённый"),W("settle","устроиться","Settle down.","обосноваться"),W("shape","форма","Round shape.","очертание"),W("share","делиться","Share others.","совместно"),W("skill","навык","Useful skill.","умение"),W("spread","распространять","Spread news.","рассказать"),
-W("straight","прямой","Go straight.","не кривой"),W("struggle","бороться","Struggle free.","сражаться"),W("supply","поставка","Food supply.","обеспечение"),W("support","поддержка","I support.","помощь"),W("surface","поверхность","Smooth surface.","верх"),W("suspect","подозревать","I suspect.","не доверять"),W("symbol","символ","Peace symbol.","знак"),W("target","цель","Hit target.","мишень"),W("treat","обращаться","Treat well.","относиться"),W("variety","разнообразие","Variety options.","множество"),
-W("vast","обширный","Vast ocean.","огромный"),W("victory","победа","Great victory.","выигрыш"),W("wealthy","богатый","Wealthy man.","состоятельный"),W("weapon","оружие","Dangerous weapon.","атака"),W("welcome","приветствие","Welcome home.","добро пожаловать"),W("worth","стоящий","It is worth.","ценный"),W("youth","молодёжь","Today youth.","молодые"),W("afraid","испуганный","Do not be afraid.","страх"),W("arrange","организовать","Arrange meeting.","устроить"),W("avoid","избегать","Avoid danger.","обходить"),
-W("benefit","польза","Great benefit.","выгода"),W("border","граница","Cross border.","рубеж"),W("brief","краткий","Brief summary.","короткий"),W("celebrate","праздновать","Celebrate birthday.","отмечать"),W("command","команда","Give command.","приказ"),W("connect","соединять","Connect wires.","связать"),W("courage","смелость","Show courage.","храбрость"),W("cruel","жестокий","Cruel person.","бесчеловечный"),W("deal","сделка","Good deal.","соглашение"),W("demand","требовать","High demand.","спрос"),
-W("divide","делить","Divide equally.","разделить"),W("doubt","сомнение","Without doubt.","неуверенность"),W("eager","нетерпеливый","Eager to learn.","рвение"),W("educate","обучать","Educate children.","учить"),W("emotion","эмоция","Strong emotion.","чувство"),W("event","событие","Important event.","мероприятие"),W("fail","провалиться","Do not fail.","неудача"),W("gain","получать","Gain knowledge.","приобрести"),W("generous","щедрый","Generous gift.","не жадный"),W("grow","расти","Trees grow.","развиваться"),
-W("harm","вред","Do no harm.","ущерб"),W("hide","прятать","Hide gift.","скрывать"),W("hire","нанимать","Hire workers.","на работу"),W("huge","огромный","Huge building.","громадный"),W("injure","ранить","Injure leg.","повредить"),W("justice","справедливость","Fight justice.","правосудие"),W("lack","нехватка","Lack of time.","недостаток"),W("lead","вести","Lead team.","руководить"),W("limit","ограничение","Speed limit.","рамки"),W("obvious","очевидный","It is obvious.","ясный"),
-W("occur","происходить","Accidents occur.","случаться"),W("ordinary","обычный","Ordinary day.","не необычный"),W("perform","выполнять","Perform task.","делать"),W("permit","разрешать","Permit entry.","позволить"),W("possess","обладать","Possess talent.","владеть"),W("publish","публиковать","Publish article.","издать"),W("punish","наказывать","Punish crime.","кара"),W("recover","восстановиться","Recover illness.","выздороветь"),W("relief","облегчение","What a relief.","не тревога"),W("reveal","раскрывать","Reveal secret.","показать"),
-W("reward","награда","Great reward.","приз"),W("risk","риск","Take a risk.","опасность"),W("satisfy","удовлетворять","Satisfy needs.","довольный"),W("select","выбирать","Select option.","отобрать"),W("sense","чувство","Common sense.","ощущение"),W("severe","суровый","Severe winter.","строгий"),W("signal","сигнал","Warning signal.","знак"),W("society","общество","Modern society.","социум"),W("succeed","преуспеть","Succeed in life.","удаться"),W("suffer","страдать","Suffer pain.","мучиться"),W("talent","талант","Natural talent.","дар"),W("threat","угроза","Serious threat.","опасность"),
-],
-3:[
-W("accomplish","достигать","Accomplished goal.","выполнить"),W("consequence","последствие","Has consequences.","результат"),W("enthusiasm","энтузиазм","Great enthusiasm.","воодушевление"),W("approximately","приблизительно","Approximately 50.","примерно"),W("inevitable","неизбежный","Change inevitable.","нельзя избежать"),W("significant","значительный","Significant change.","существенный"),W("thoroughly","тщательно","Check thoroughly.","детально"),W("contribute","вносить вклад","Contribute more.","участвовать"),W("establish","устанавливать","Establish rule.","основать"),W("opportunity","возможность","Great opportunity.","шанс"),
-W("influence","влияние","Positive influence.","воздействие"),W("challenge","вызов","Accept challenge.","испытание"),W("determine","определять","Determine cause.","выяснить"),W("negotiate","переговоры","Negotiate deal.","договариваться"),W("consistent","последовательный","Be consistent.","стабильный"),W("distinguish","различать","Distinguish right.","отличать"),W("emphasize","подчёркивать","Emphasize point.","выделять"),W("generate","генерировать","Generate ideas.","создавать"),W("implement","внедрять","Implement plan.","реализовать"),W("maintain","поддерживать","Maintain health.","сохранять"),
-W("persuade","убеждать","Persuade him.","склонить"),W("recognize","узнавать","Recognize face.","опознать"),W("assume","предполагать","Do not assume.","допускать"),W("obligation","обязательство","Legal obligation.","долг"),W("perspective","перспектива","New perspective.","взгляд"),W("anticipate","ожидать","Anticipate success.","предвидеть"),W("beneficial","полезный","Beneficial habit.","пользу"),W("commitment","приверженность","Strong commitment.","обязательство"),W("deliberately","намеренно","Did deliberately.","специально"),W("eliminate","устранять","Eliminate risk.","убрать"),
-W("frequently","часто","Visit frequently.","регулярно"),W("guarantee","гарантия","Guarantee quality.","ручаться"),W("interference","вмешательство","No interference.","вторжение"),W("pursue","преследовать","Pursue dreams.","стремиться"),W("sufficient","достаточный","Sufficient proof.","хватает"),W("versatile","универсальный","Versatile tool.","многофункц."),W("accessible","доступный","Easily accessible.","получить"),W("acknowledge","признавать","Acknowledge error.","подтвердить"),W("advocate","защищать","Advocate change.","отстаивать"),W("compensate","компенсировать","Compensate loss.","возместить"),
-W("compromise","компромисс","Reach compromise.","уступка"),W("contradict","противоречить","Do not contradict.","опровергать"),W("controversy","полемика","Big controversy.","спор"),W("convince","убедить","Convince me.","поверить"),W("deadline","крайний срок","Meet deadline.","дата сдачи"),W("decline","снижаться","Sales declined.","уменьшаться"),W("diversity","разнообразие","Cultural diversity.","различия"),W("efficiency","эффективность","Improve efficiency.","продуктивность"),W("evaluate","оценивать","Evaluate results.","ценность"),W("evident","очевидный","It is evident.","ясный"),
-W("exception","исключение","Without exception.","не по правилу"),W("expansion","расширение","Business expansion.","увеличение"),W("explicit","явный","Explicit rules.","чёткий"),W("furthermore","более того","Furthermore disagree.","кроме того"),W("highlight","выделять","Highlight points.","подсветить"),W("integrity","честность","Person of integrity.","порядочность"),W("justify","оправдывать","Justify decision.","обосновать"),W("legislation","законодательство","New legislation.","закон"),W("nevertheless","тем не менее","Nevertheless tried.","однако"),W("outcome","результат","Positive outcome.","итог"),
-W("overseas","за границей","Overseas travel.","заморский"),W("phenomenon","явление","Natural phenomenon.","феномен"),W("priority","приоритет","Top priority.","первоочередной"),W("procedure","процедура","Follow procedure.","порядок"),W("productivity","производительность","High productivity.","эффективность"),W("proportion","пропорция","In proportion.","соотношение"),W("prospect","перспектива","Good prospects.","будущее"),W("regulation","регулирование","Government regulation.","правила"),W("relevant","уместный","Relevant info.","подходящий"),W("restriction","ограничение","Travel restriction.","запрет"),
-W("revenue","доход","Annual revenue.","выручка"),W("scenario","сценарий","Worst scenario.","вариант"),W("scope","охват","Beyond scope.","рамки"),W("sequence","последовательность","In sequence.","порядок"),W("strategy","стратегия","Marketing strategy.","план"),W("substitute","замена","Find substitute.","заменитель"),W("temporary","временный","Temporary fix.","не постоянный"),W("tendency","тенденция","Growing tendency.","направленность"),W("transform","преобразовывать","Transform business.","изменить"),W("ultimate","конечный","Ultimate goal.","окончательный"),
-W("unique","уникальный","Unique style.","единственный"),W("valid","действительный","Valid argument.","обоснованный"),W("widespread","повсеместный","Widespread use.","распространённый"),W("allocation","распределение","Budget allocation.","ресурсы"),W("dimension","измерение","New dimension.","размер"),W("display","отображать","Display results.","показать"),W("encounter","столкнуться","Encounter problem.","встретить"),W("incentive","стимул","Financial incentive.","мотивация"),W("modify","модифицировать","Modify plan.","изменить"),W("accumulate","накапливать","Accumulate data.","собирать"),
-W("convey","передавать","Convey message.","донести"),W("depict","изображать","Depict scene.","описать"),W("imperative","необходимый","It is imperative.","обязательный"),W("notion","понятие","Vague notion.","представление"),W("perceive","воспринимать","Perceive danger.","ощущать"),W("predominant","преобладающий","Predominant view.","основной"),W("reinforce","укреплять","Reinforce idea.","усилить"),W("subsequent","последующий","Subsequent events.","следующий"),W("undertake","предпринимать","Undertake task.","браться"),W("yield","приносить","Yield results.","давать"),
-],
-4:[
-W("ambiguous","неоднозначный","Ambiguous statement.","двусмысленный"),W("contemplate","размышлять","Contemplate meaning.","думать"),W("deteriorate","ухудшаться","Health deteriorated.","хуже"),W("exaggerate","преувеличивать","Do not exaggerate.","больше чем есть"),W("fluctuate","колебаться","Prices fluctuate.","туда-сюда"),W("scrutinize","изучать","Scrutinize evidence.","исследовать"),W("vulnerability","уязвимость","Security flaw.","слабое место"),W("unprecedented","беспрецедентный","Unprecedented event.","нет аналогов"),W("comprehensive","всеобъемлющий","Comprehensive guide.","исчерпывающий"),W("sophisticated","изощрённый","Sophisticated approach.","утончённый"),
-W("misconception","заблуждение","Common misconception.","ошибка"),W("counterpart","аналог","Foreign counterpart.","партнёр"),W("contradiction","противоречие","Clear contradiction.","взаимоисключение"),W("discrepancy","расхождение","Data discrepancy.","несоответствие"),W("feasible","осуществимый","Feasible plan.","реально"),W("indigenous","коренной","Indigenous people.","местный"),W("jeopardize","угрожать","Jeopardize career.","опасность"),W("legitimate","законный","Legitimate concern.","правомерный"),W("meticulous","скрупулёзный","Meticulous work.","тщательный"),W("negligible","незначительный","Negligible amount.","ничтожный"),
-W("obsolete","устаревший","Obsolete tech.","не современный"),W("peripheral","периферийный","Peripheral vision.","на краю"),W("prevalent","распространённый","Prevalent disease.","преобладающий"),W("relinquish","отказываться","Relinquish control.","уступить"),W("speculate","догадки","Only speculate.","предполагать"),W("undermine","подрывать","Undermine authority.","ослаблять"),W("viable","жизнеспособный","Viable solution.","рабочий"),W("alleviate","облегчать","Alleviate pain.","уменьшить"),W("compile","составлять","Compile report.","собрать"),W("empirical","эмпирический","Empirical evidence.","на опыте"),
-W("hierarchy","иерархия","Corporate hierarchy.","уровни"),W("inherent","неотъемлемый","Inherent risk.","присущий"),W("paradigm","парадигма","Paradigm shift.","модель"),W("reconcile","примирять","Reconcile differences.","согласие"),W("adjacent","смежный","Adjacent rooms.","рядом"),W("arbitrary","произвольный","Arbitrary decision.","случайный"),W("benchmark","эталон","Set benchmark.","мерило"),W("coherent","связный","Coherent argument.","логичный"),W("concurrent","одновременный","Concurrent events.","параллельный"),W("deficiency","недостаток","Vitamin deficiency.","нехватка"),
-W("deplete","истощать","Deplete resources.","израсходовать"),W("encompass","охватывать","Encompass all.","включать"),W("erratic","непредсказуемый","Erratic behavior.","нестабильный"),W("exacerbate","усугублять","Exacerbate problem.","хуже"),W("formidable","грозный","Formidable foe.","внушительный"),W("hinder","препятствовать","Hinder progress.","мешать"),W("imminent","неминуемый","Imminent threat.","вот-вот"),W("impartial","беспристрастный","Impartial judge.","объективный"),W("infer","делать вывод","Infer from data.","заключить"),W("mitigate","смягчать","Mitigate risk.","уменьшить"),
-W("mundane","обыденный","Mundane tasks.","рутинный"),W("nuance","нюанс","Subtle nuance.","тонкость"),W("paramount","первостепенный","Paramount importance.","главнейший"),W("plausible","правдоподобный","Plausible theory.","вероятный"),W("preclude","исключать","Preclude doubt.","предотвратить"),W("profound","глубокий","Profound impact.","значительный"),W("proliferate","множиться","Ideas proliferate.","распространяться"),W("resilient","стойкий","Resilient person.","выносливый"),W("salient","существенный","Salient point.","заметный"),W("stipulate","оговаривать","Stipulate terms.","условия"),
-W("substantiate","обосновывать","Substantiate claim.","подтвердить"),W("sustain","поддерживать","Sustain growth.","сохранять"),W("tangible","осязаемый","Tangible results.","реальный"),W("transparent","прозрачный","Transparent process.","открытый"),W("trigger","запускать","Trigger reaction.","вызывать"),W("volatile","изменчивый","Volatile market.","нестабильный"),W("aggregate","совокупный","Aggregate data.","суммарный"),W("bolster","укреплять","Bolster confidence.","поддержать"),W("curtail","сокращать","Curtail spending.","урезать"),W("efficacy","эффективность","Drug efficacy.","действенность"),
-W("extrapolate","экстраполировать","Extrapolate data.","предсказать"),W("impetus","импульс","Give impetus.","толчок"),W("liability","ответственность","Legal liability.","обязательство"),W("mandate","полномочие","Government mandate.","указ"),W("methodology","методология","Research methodology.","подход"),W("trajectory","траектория","Career trajectory.","путь"),W("disparity","неравенство","Income disparity.","разрыв"),W("commensurate","соразмерный","Commensurate effort.","пропорциональный"),W("pragmatic","прагматичный","Pragmatic approach.","практичный"),W("superfluous","лишний","Superfluous details.","избыточный"),
-W("corroborate","подтверждать","Corroborate story.","подкрепить"),W("detrimental","вредный","Detrimental effects.","пагубный"),W("diligent","усердный","Diligent student.","прилежный"),W("eradicate","искоренять","Eradicate disease.","уничтожить"),W("expedite","ускорять","Expedite process.","быстрее"),W("fallacy","заблуждение","Logical fallacy.","ошибка логики"),W("impeccable","безупречный","Impeccable taste.","идеальный"),W("indispensable","незаменимый","Indispensable tool.","необходимый"),W("lucrative","прибыльный","Lucrative deal.","выгодный"),W("pervasive","всепроникающий","Pervasive influence.","повсеместный"),
-],
-5:[
-W("acquiesce","уступить","Acquiesced demands.","нехотя"),W("circumvent","обходить","Circumvent rules.","обходной путь"),W("ephemeral","мимолётный","Ephemeral beauty.","кратковременный"),W("juxtapose","сопоставлять","Juxtapose ideas.","рядом"),W("quintessential","типичнейший","Quintessential example.","характерный"),W("vindicate","оправдать","Evidence vindicated.","доказать"),W("perfunctory","формальный","Perfunctory check.","для галочки"),W("recalcitrant","непокорный","Recalcitrant student.","упрямый"),W("serendipity","случайность","By serendipity.","удача"),W("idiosyncratic","своеобразный","Idiosyncratic style.","уникальный"),
-W("magnanimous","великодушный","Magnanimous gesture.","благородный"),W("obfuscate","запутывать","Obfuscate truth.","не понятный"),W("pernicious","пагубный","Pernicious influence.","вредоносный"),W("reticent","сдержанный","Reticent person.","молчаливый"),W("spurious","ложный","Spurious claim.","фальшивый"),W("tenacious","упорный","Tenacious fighter.","настойчивый"),W("vacillate","колебаться","Stop vacillating.","не решить"),W("capricious","капризный","Capricious weather.","переменчивый"),W("deleterious","вредный","Deleterious effects.","пагубный"),W("equivocal","двусмысленный","Equivocal answer.","уклончивый"),
-W("gregarious","общительный","Gregarious person.","компания"),W("indefatigable","неутомимый","Indefatigable worker.","без усталости"),W("loquacious","словоохотливый","Loquacious neighbor.","болтливый"),W("nefarious","гнусный","Nefarious scheme.","злодейский"),W("ostentatious","показной","Ostentatious wealth.","напоказ"),W("sagacious","проницательный","Sagacious leader.","мудрый"),W("truculent","агрессивный","Truculent attitude.","воинственный"),W("vicarious","косвенный","Vicarious pleasure.","через других"),W("extricate","высвобождать","Extricate yourself.","вытащить"),W("conundrum","головоломка","Moral conundrum.","дилемма"),
-W("inexorable","неумолимый","Inexorable time.","неостановимый"),W("inscrutable","непостижимый","Inscrutable face.","загадочный"),W("disparate","несопоставимый","Disparate views.","разные"),W("sycophant","подхалим","Many sycophants.","льстец"),W("intransigent","непреклонный","Intransigent stance.","бескомпромиссный"),W("acrimonious","язвительный","Acrimonious debate.","злобный"),W("anachronism","анахронизм","Total anachronism.","пережиток"),W("bellicose","воинственный","Bellicose leader.","агрессивный"),W("cacophony","какофония","Cacophony sounds.","дисгармония"),W("ebullient","кипучий","Ebullient personality.","радостный"),
-W("fastidious","привередливый","Fastidious eater.","разборчивый"),W("grandiloquent","напыщенный","Grandiloquent speech.","высокопарный"),W("hapless","незадачливый","Hapless victim.","невезучий"),W("iconoclast","иконоборец","True iconoclast.","против норм"),W("indolent","ленивый","Indolent lifestyle.","праздный"),W("laconic","лаконичный","Laconic reply.","краткий"),W("malfeasance","правонарушение","Corporate malfeasance.","злоупотребление"),W("obsequious","подобострастный","Obsequious behavior.","услужливый"),W("parsimonious","скупой","Parsimonious man.","прижимистый"),W("quixotic","донкихотский","Quixotic quest.","нереалистичный"),
-W("rancor","злоба","Without rancor.","обида"),W("soporific","снотворный","Soporific lecture.","усыпляющий"),W("trepidation","трепет","With trepidation.","страх"),W("unctuous","елейный","Unctuous smile.","неискренний"),W("veracious","правдивый","Veracious account.","истинный"),W("whimsical","причудливый","Whimsical idea.","фантазийный"),W("zealot","фанатик","Political zealot.","приверженец"),W("aberration","отклонение","Statistical aberration.","аномалия"),W("capitulate","капитулировать","Forced capitulate.","сдаться"),W("duplicity","двуличие","Full of duplicity.","лицемерие"),
-W("esoteric","эзотерический","Esoteric knowledge.","для немногих"),W("furtive","украдкой","Furtive look.","тайком"),W("hegemony","гегемония","Cultural hegemony.","господство"),W("impervious","невосприимчивый","Impervious criticism.","непробиваемый"),W("languid","вялый","Languid afternoon.","томный"),W("myopic","близорукий","Myopic view.","недальновидный"),W("opulent","роскошный","Opulent mansion.","богатый"),W("perfidious","вероломный","Perfidious ally.","предательский"),W("querulous","ворчливый","Querulous tone.","жалующийся"),W("repudiate","отвергать","Repudiate accusation.","отречься"),
-W("sanguine","оптимистичный","Sanguine outlook.","жизнерадостный"),W("torpid","вялый","Torpid economy.","оцепенелый"),W("mellifluous","мелодичный","Mellifluous voice.","сладкозвучный"),W("panacea","панацея","No panacea.","от всех бед"),W("prodigal","расточительный","Prodigal son.","транжира"),W("taciturn","молчаливый","Taciturn man.","неразговорчивый"),W("calumny","клевета","Spread calumny.","ложное обвинение"),W("diatribe","тирада","Bitter diatribe.","гневная речь"),W("garrulous","болтливый","Garrulous old man.","словоохотливый"),W("hubris","гордыня","His hubris.","самонадеянность"),
-W("enmity","вражда","Deep enmity.","враждебность"),W("chicanery","крючкотворство","Legal chicanery.","уловки"),W("avarice","алчность","Driven avarice.","жадность"),W("despot","деспот","Cruel despot.","тиран"),W("flagrant","вопиющий","Flagrant violation.","грубый"),W("myriad","бесчисленный","Myriad options.","множество"),W("machination","козни","Political machinations.","интриги"),W("perfidy","вероломство","Act of perfidy.","предательство"),W("temerity","дерзость","Had temerity.","безрассудство"),W("nihilism","нигилизм","Philosophical nihilism.","отрицание"),
+W("beautiful","красивый","Beautiful sunset.","привлекательный"),W("remember","помнить","I remember.","не забыть"),W("perhaps","возможно","Perhaps rain.","может быть"),W("journey","путешествие","Long journey.","поездка"),W("difficult","трудный","Difficult task.","не лёгкий"),W("explain","объяснять","Please explain.","понятно"),W("receive","получать","Received letter.","не отправить"),W("several","несколько","Several people.","больше двух"),W("prepare","готовиться","Prepare exam.","заранее"),W("enough","достаточно","Enough.","хватит"),
+W("achieve","достигать","Achieve goals.","добиться"),W("trouble","проблема","In trouble.","неприятность"),W("suddenly","внезапно","Suddenly rained.","неожиданно"),W("although","хотя","Although rained.","несмотря"),W("honest","честный","Be honest.","не лживый"),W("provide","предоставлять","Provide ID.","обеспечить"),W("strength","сила","Inner strength.","мощь"),W("imagine","представлять","Imagine world.","фантазия"),W("contain","содержать","Contains books.","включать"),W("favorite","любимый","Favorite movie.","нравится"),
+W("promise","обещание","I promise.","слово"),W("beyond","за пределами","Beyond horizon.","дальше"),W("curious","любопытный","Curious child.","узнать"),W("escape","побег","Escape prison.","сбежать"),W("increase","увеличивать","Increase volume.","больше"),W("accept","принимать","Accept offer.","согласиться"),W("advice","совет","Good advice.","рекомендация"),W("allow","позволять","Allow me.","разрешить"),W("ancient","древний","Ancient city.","старый"),W("bright","яркий","Bright star.","сияющий"),
+W("calm","спокойный","Stay calm.","не волнение"),W("cause","причина","The cause.","источник"),W("compare","сравнивать","Compare two.","отличия"),W("consider","рассматривать","Consider option.","обдумать"),W("create","создавать","Create new.","с нуля"),W("develop","развивать","Develop skill.","совершенствовать"),W("discover","обнаруживать","Discover secret.","найти"),W("effort","усилие","Make effort.","стараться"),W("especially","особенно","Especially you.","прежде всего"),W("excellent","отличный","Excellent work!","превосходный"),
+W("foreign","иностранный","Foreign country.","зарубежный"),W("improve","улучшать","Improve skills.","лучше"),W("instead","вместо","Use instead.","замена"),W("notice","замечать","I noticed.","внимание"),W("opinion","мнение","My opinion.","взгляд"),W("patient","терпеливый","Be patient.","ждать"),W("protect","защищать","Protect nature.","охранять"),W("remain","оставаться","Remain seated.","не уходить"),W("require","требовать","Requires time.","нуждаться"),W("similar","похожий","Look similar.","напоминающий"),
+W("suggest","предлагать","I suggest.","совет"),W("survive","выживать","Survive storm.","живым"),W("prevent","предотвращать","Prevent mistake.","не допустить"),W("rare","редкий","Rare flower.","не частый"),W("realize","осознавать","I realized.","понять"),W("reduce","уменьшать","Reduce costs.","не увеличить"),W("replace","заменять","Replace battery.","новое"),W("respect","уважение","Show respect.","почтение"),W("respond","отвечать","Respond quickly.","реагировать"),W("result","результат","Good result.","итог"),
+W("share","делиться","Share others.","совместно"),W("skill","навык","Useful skill.","умение"),W("support","поддержка","I support.","помощь"),W("variety","разнообразие","Variety options.","множество"),W("victory","победа","Great victory.","выигрыш"),W("worth","стоящий","It is worth.","ценный"),W("avoid","избегать","Avoid danger.","обходить"),W("celebrate","праздновать","Celebrate birthday.","отмечать"),W("courage","смелость","Show courage.","храбрость"),W("demand","требовать","High demand.","спрос"),
+W("doubt","сомнение","Without doubt.","неуверенность"),W("eager","нетерпеливый","Eager to learn.","рвение"),W("emotion","эмоция","Strong emotion.","чувство"),W("event","событие","Important event.","мероприятие"),W("generous","щедрый","Generous gift.","не жадный"),W("huge","огромный","Huge building.","громадный"),W("justice","справедливость","Fight justice.","правосудие"),W("lead","вести","Lead team.","руководить"),W("obvious","очевидный","It is obvious.","ясный"),W("risk","риск","Take a risk.","опасность"),
+W("succeed","преуспеть","Succeed in life.","удаться"),W("talent","талант","Natural talent.","дар"),W("reveal","раскрывать","Reveal secret.","показать"),W("publish","публиковать","Publish article.","издать"),W("recover","восстановиться","Recover illness.","выздороветь"),
+],3:[
+W("accomplish","достигать","Accomplished goal.","выполнить"),W("consequence","последствие","Has consequences.","результат"),W("enthusiasm","энтузиазм","Great enthusiasm.","воодушевление"),W("approximately","приблизительно","Approximately 50.","примерно"),W("inevitable","неизбежный","Change inevitable.","нельзя избежать"),W("significant","значительный","Significant change.","существенный"),W("contribute","вносить вклад","Contribute more.","участвовать"),W("establish","устанавливать","Establish rule.","основать"),W("opportunity","возможность","Great opportunity.","шанс"),W("influence","влияние","Positive influence.","воздействие"),
+W("challenge","вызов","Accept challenge.","испытание"),W("determine","определять","Determine cause.","выяснить"),W("negotiate","переговоры","Negotiate deal.","договариваться"),W("consistent","последовательный","Be consistent.","стабильный"),W("emphasize","подчёркивать","Emphasize point.","выделять"),W("generate","генерировать","Generate ideas.","создавать"),W("implement","внедрять","Implement plan.","реализовать"),W("maintain","поддерживать","Maintain health.","сохранять"),W("persuade","убеждать","Persuade him.","склонить"),W("recognize","узнавать","Recognize face.","опознать"),
+W("anticipate","ожидать","Anticipate success.","предвидеть"),W("beneficial","полезный","Beneficial habit.","пользу"),W("commitment","приверженность","Strong commitment.","обязательство"),W("eliminate","устранять","Eliminate risk.","убрать"),W("guarantee","гарантия","Guarantee quality.","ручаться"),W("sufficient","достаточный","Sufficient proof.","хватает"),W("versatile","универсальный","Versatile tool.","многофункц."),W("compromise","компромисс","Reach compromise.","уступка"),W("convince","убедить","Convince me.","поверить"),W("deadline","крайний срок","Meet deadline.","дата сдачи"),
+W("decline","снижаться","Sales declined.","уменьшаться"),W("efficiency","эффективность","Improve efficiency.","продуктивность"),W("evaluate","оценивать","Evaluate results.","ценность"),W("expansion","расширение","Business expansion.","увеличение"),W("highlight","выделять","Highlight points.","подсветить"),W("integrity","честность","Person of integrity.","порядочность"),W("justify","оправдывать","Justify decision.","обосновать"),W("legislation","законодательство","New legislation.","закон"),W("nevertheless","тем не менее","Nevertheless tried.","однако"),W("outcome","результат","Positive outcome.","итог"),
+W("phenomenon","явление","Natural phenomenon.","феномен"),W("priority","приоритет","Top priority.","первоочередной"),W("relevant","уместный","Relevant info.","подходящий"),W("revenue","доход","Annual revenue.","выручка"),W("scenario","сценарий","Worst scenario.","вариант"),W("strategy","стратегия","Marketing strategy.","план"),W("temporary","временный","Temporary fix.","не постоянный"),W("transform","преобразовывать","Transform business.","изменить"),W("unique","уникальный","Unique style.","единственный"),W("widespread","повсеместный","Widespread use.","распространённый"),
+W("accumulate","накапливать","Accumulate data.","собирать"),W("convey","передавать","Convey message.","донести"),W("perceive","воспринимать","Perceive danger.","ощущать"),W("reinforce","укреплять","Reinforce idea.","усилить"),W("subsequent","последующий","Subsequent events.","следующий"),W("yield","приносить","Yield results.","давать"),
+],4:[
+W("ambiguous","неоднозначный","Ambiguous statement.","двусмысленный"),W("contemplate","размышлять","Contemplate meaning.","думать"),W("deteriorate","ухудшаться","Health deteriorated.","хуже"),W("exaggerate","преувеличивать","Do not exaggerate.","больше чем есть"),W("fluctuate","колебаться","Prices fluctuate.","туда-сюда"),W("scrutinize","изучать","Scrutinize evidence.","исследовать"),W("unprecedented","беспрецедентный","Unprecedented event.","нет аналогов"),W("comprehensive","всеобъемлющий","Comprehensive guide.","исчерпывающий"),W("sophisticated","изощрённый","Sophisticated approach.","утончённый"),W("feasible","осуществимый","Feasible plan.","реально"),
+W("jeopardize","угрожать","Jeopardize career.","опасность"),W("legitimate","законный","Legitimate concern.","правомерный"),W("meticulous","скрупулёзный","Meticulous work.","тщательный"),W("obsolete","устаревший","Obsolete tech.","не современный"),W("prevalent","распространённый","Prevalent disease.","преобладающий"),W("undermine","подрывать","Undermine authority.","ослаблять"),W("viable","жизнеспособный","Viable solution.","рабочий"),W("alleviate","облегчать","Alleviate pain.","уменьшить"),W("empirical","эмпирический","Empirical evidence.","на опыте"),W("hierarchy","иерархия","Corporate hierarchy.","уровни"),
+W("inherent","неотъемлемый","Inherent risk.","присущий"),W("paradigm","парадигма","Paradigm shift.","модель"),W("reconcile","примирять","Reconcile differences.","согласие"),W("coherent","связный","Coherent argument.","логичный"),W("exacerbate","усугублять","Exacerbate problem.","хуже"),W("formidable","грозный","Formidable foe.","внушительный"),W("hinder","препятствовать","Hinder progress.","мешать"),W("imminent","неминуемый","Imminent threat.","вот-вот"),W("mitigate","смягчать","Mitigate risk.","уменьшить"),W("nuance","нюанс","Subtle nuance.","тонкость"),
+W("paramount","первостепенный","Paramount importance.","главнейший"),W("plausible","правдоподобный","Plausible theory.","вероятный"),W("profound","глубокий","Profound impact.","значительный"),W("resilient","стойкий","Resilient person.","выносливый"),W("sustain","поддерживать","Sustain growth.","сохранять"),W("tangible","осязаемый","Tangible results.","реальный"),W("volatile","изменчивый","Volatile market.","нестабильный"),W("bolster","укреплять","Bolster confidence.","поддержать"),W("pragmatic","прагматичный","Pragmatic approach.","практичный"),W("corroborate","подтверждать","Corroborate story.","подкрепить"),
+W("eradicate","искоренять","Eradicate disease.","уничтожить"),W("impeccable","безупречный","Impeccable taste.","идеальный"),W("lucrative","прибыльный","Lucrative deal.","выгодный"),W("pervasive","всепроникающий","Pervasive influence.","повсеместный"),W("superfluous","лишний","Superfluous details.","избыточный"),W("diligent","усердный","Diligent student.","прилежный"),W("trajectory","траектория","Career trajectory.","путь"),W("disparity","неравенство","Income disparity.","разрыв"),W("expedite","ускорять","Expedite process.","быстрее"),W("fallacy","заблуждение","Logical fallacy.","ошибка логики"),
+],5:[
+W("acquiesce","уступить","Acquiesced demands.","нехотя"),W("circumvent","обходить","Circumvent rules.","обходной путь"),W("ephemeral","мимолётный","Ephemeral beauty.","кратковременный"),W("quintessential","типичнейший","Quintessential example.","характерный"),W("vindicate","оправдать","Evidence vindicated.","доказать"),W("perfunctory","формальный","Perfunctory check.","для галочки"),W("recalcitrant","непокорный","Recalcitrant student.","упрямый"),W("serendipity","случайность","By serendipity.","удача"),W("magnanimous","великодушный","Magnanimous gesture.","благородный"),W("obfuscate","запутывать","Obfuscate truth.","не понятный"),
+W("pernicious","пагубный","Pernicious influence.","вредоносный"),W("tenacious","упорный","Tenacious fighter.","настойчивый"),W("capricious","капризный","Capricious weather.","переменчивый"),W("gregarious","общительный","Gregarious person.","компания"),W("loquacious","словоохотливый","Loquacious neighbor.","болтливый"),W("nefarious","гнусный","Nefarious scheme.","злодейский"),W("ostentatious","показной","Ostentatious wealth.","напоказ"),W("sagacious","проницательный","Sagacious leader.","мудрый"),W("conundrum","головоломка","Moral conundrum.","дилемма"),W("inexorable","неумолимый","Inexorable time.","неостановимый"),
+W("inscrutable","непостижимый","Inscrutable face.","загадочный"),W("sycophant","подхалим","Many sycophants.","льстец"),W("intransigent","непреклонный","Intransigent stance.","бескомпромиссный"),W("bellicose","воинственный","Bellicose leader.","агрессивный"),W("cacophony","какофония","Cacophony sounds.","дисгармония"),W("ebullient","кипучий","Ebullient personality.","радостный"),W("laconic","лаконичный","Laconic reply.","краткий"),W("quixotic","донкихотский","Quixotic quest.","нереалистичный"),W("soporific","снотворный","Soporific lecture.","усыпляющий"),W("whimsical","причудливый","Whimsical idea.","фантазийный"),
+W("zealot","фанатик","Political zealot.","приверженец"),W("capitulate","капитулировать","Forced capitulate.","сдаться"),W("duplicity","двуличие","Full of duplicity.","лицемерие"),W("esoteric","эзотерический","Esoteric knowledge.","для немногих"),W("hegemony","гегемония","Cultural hegemony.","господство"),W("opulent","роскошный","Opulent mansion.","богатый"),W("perfidious","вероломный","Perfidious ally.","предательский"),W("sanguine","оптимистичный","Sanguine outlook.","жизнерадостный"),W("mellifluous","мелодичный","Mellifluous voice.","сладкозвучный"),W("hubris","гордыня","His hubris.","самонадеянность"),
 ]};
 
-// === APP STATE ===
-const LS_KEY = 'vocabmaster';
-const MT=0.7, MC=3, BS=20;
-const LN={1:'Beginner',2:'Elementary',3:'Intermediate',4:'Upper-Inter.',5:'Advanced'};
-const LC={1:{bg:'from-green-400 to-emerald-500',t:'text-green-400',b:'bg-green-500'},2:{bg:'from-blue-400 to-cyan-500',t:'text-blue-400',b:'bg-blue-500'},3:{bg:'from-yellow-400 to-orange-500',t:'text-yellow-400',b:'bg-yellow-500'},4:{bg:'from-purple-400 to-violet-500',t:'text-purple-400',b:'bg-purple-500'},5:{bg:'from-red-400 to-rose-500',t:'text-red-400',b:'bg-red-500'}};
+// === STORAGE ===
+const LS={p:'vm2_progress',u:'vm2_user_words',s:'vm2_sound',k:'vm2_streak'};
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function loadUW(){return load(LS.u,{1:[],2:[],3:[],4:[],5:[]})}
+function getDB(){const uw=loadUW();const db={};for(let l=1;l<=5;l++)db[l]=[...(BI[l]||[]),...(uw[l]||[])];return db}
+function toast(m,c){document.getElementById('tc').innerHTML=`<div class="toast" style="background:${c||'#22c55e'};color:#fff">${m}</div>`;setTimeout(()=>document.getElementById('tc').innerHTML='',2600)}
 
-function loadState(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){return{}}}
-function saveState(s){localStorage.setItem(LS_KEY,JSON.stringify(s))}
+// === SRS ENGINE (Simplified FSRS) ===
+// Card states: 0=new, 1=learning, 2=review, 3=relearning
+// Intervals in minutes: [1, 10, 1440(1d), 4320(3d), 10080(7d), 21600(15d), 43200(30d), 86400(60d), 129600(90d)]
+const INTERVALS=[1,10,1440,4320,10080,21600,43200,86400,129600];
+const LEECH_THRESHOLD=6;
+const NEW_PER_DAY=15;
+const today=()=>new Date().toISOString().slice(0,10);
 
-let soundOn = localStorage.getItem('vm_sound') !== 'off';
-let state={wP:loadState(),st:{c:0,w:0,s:0,b:0},sc:'levels',cL:1,cI:0,sA:false,sH:false,sQ:[],sR:[],sM:null,cu:null};
-function toggleSound(){soundOn=!soundOn;localStorage.setItem('vm_sound',soundOn?'on':'off');render()}
+function getCard(l,i){
+  const all=load(LS.p,{});
+  return all[l+'-'+i]||{st:0,step:0,due:0,lapses:0,reps:0,ease:2.5,leech:false};
+}
+function saveCard(l,i,c){const all=load(LS.p,{});all[l+'-'+i]=c;save(LS.p,all)}
 
-function gW(l,i){return state.wP[l+'-'+i]||{c:0,w:0}}
-function gP(l){const w=DB[l]||[];return w.length?w.filter((_,i)=>gW(l,i).c>=MC).length/w.length:0}
-function gS(l){const w=DB[l]||[];let m=0,p=0,n=0;w.forEach((_,i)=>{const x=gW(l,i);x.c>=MC?m++:(x.c>0||x.w>0)?p++:n++});return{m,p,n,t:w.length}}
-function getUL(){const u=[1];for(let l=1;l<=4;l++)if(gP(l)>=MT)u.push(l+1);return u}
-
-function go(lv,mode){
-  let q=(DB[lv]||[]).map((w,i)=>({w:w[0],tr:w[1],ex:w[2],h:w[3],lv,i}));
-  if(mode==='u')q=q.filter(x=>gW(x.lv,x.i).c<MC);
-  else if(mode==='r')q=q.filter(x=>gW(x.lv,x.i).c>=MC);
-  q.sort((a,b)=>{const pa=gW(a.lv,a.i),pb=gW(b.lv,b.i);if((pa.c>=MC)!==(pb.c>=MC))return pa.c>=MC?1:-1;return pa.c-pb.c});
-  if(!q.length)return;
-  if(mode!=='r'&&q.length>BS)q=q.slice(0,BS);
-  state.sQ=q;state.cI=0;state.sA=false;state.sH=false;state.sR=[];state.cL=lv;state.sM=null;state.sc='study';render();
+function reviewCard(l,i,grade){
+  // grade: 1=again, 2=hard, 3=good, 4=easy
+  const c=getCard(l,i);const now=Date.now();
+  c.reps++;
+  if(grade===1){
+    c.lapses++;c.step=0;c.st=c.st>=2?3:1;
+    c.due=now+INTERVALS[0]*60000;
+    c.ease=Math.max(1.3,c.ease-0.2);
+    if(c.lapses>=LEECH_THRESHOLD)c.leech=true;
+  }else{
+    if(c.st===0||c.st===1||c.st===3){
+      c.step++;
+      if(c.step>=2){c.st=2;c.due=now+INTERVALS[2]*60000*c.ease*(grade===4?1.3:grade===2?0.8:1);}
+      else c.due=now+INTERVALS[c.step]*60000;
+    }else{
+      const idx=INTERVALS.findIndex(v=>v*60000*c.ease>=(c.due||0)-now+INTERVALS[2]*60000);
+      const ni=Math.min(idx+1+(grade===4?1:0),INTERVALS.length-1);
+      c.ease=Math.max(1.3,c.ease+(grade===4?0.15:grade===2?-0.15:0));
+      c.due=now+INTERVALS[ni]*60000*c.ease;
+    }
+  }
+  saveCard(l,i,c);return c;
 }
 
-function ans(ok){
-  const cW=state.sQ[state.cI];if(!cW)return;
-  const k=cW.lv+'-'+cW.i,pv=state.wP[k]||{c:0,w:0};
-  state.wP[k]={c:ok?pv.c+1:Math.max(0,pv.c-1),w:ok?pv.w:pv.w+1};
-  saveState(state.wP);
-  state.sR.push({...cW,ok});
-  const s=state.st;s.c+=ok?1:0;s.w+=ok?0:1;s.b=ok?Math.max(s.b,s.s+1):s.b;s.s=ok?s.s+1:0;
-  const card=document.getElementById('card');
-  if(card){card.className='rounded-2xl p-6 text-center transition-all '+(ok?'anim-g':'anim-r')}
-  setTimeout(()=>{
-    if(state.cI+1<state.sQ.length){state.cI++;state.sA=false;state.sH=false;render();}
-    else{state.sc='results';render();}
-  },500);
+function getDueCount(l){
+  const db=getDB();const ws=db[l]||[];const now=Date.now();let due=0,nw=0;
+  ws.forEach((_,i)=>{const c=getCard(l,i);if(c.st===0)nw++;else if(c.due<=now)due++});
+  return{due,nw,total:ws.length};
 }
 
-let touchX=0;
+function getDailyReview(){
+  const db=getDB();const now=Date.now();const items=[];
+  for(let l=1;l<=5;l++){if(!getUL().includes(l))continue;
+    (db[l]||[]).forEach((_,i)=>{const c=getCard(l,i);if(c.st>0&&c.due<=now)items.push({l,i,c})});
+  }
+  items.sort((a,b)=>a.c.due-b.c.due);return items;
+}
+
+function getNewToday(l){
+  const db=getDB();const ws=db[l]||[];const d=today();const all=load(LS.p,{});
+  let introduced=0;const items=[];
+  ws.forEach((_,i)=>{const c=all[l+'-'+i];if(!c||c.st===0){items.push(i)}else if(c.firstSeen===d)introduced++});
+  return{available:items,introduced};
+}
+
+// === STREAK ===
+function getStreak(){
+  const data=load(LS.k,{days:{},current:0,best:0,lastDate:''});
+  const d=today();
+  if(data.lastDate!==d){
+    const yd=new Date();yd.setDate(yd.getDate()-1);const yds=yd.toISOString().slice(0,10);
+    if(data.lastDate===yds)data.current++;else if(data.lastDate)data.current=1;else data.current=1;
+    data.lastDate=d;data.days[d]=0;data.best=Math.max(data.best,data.current);save(LS.k,data);
+  }
+  return data;
+}
+function addStudied(n){const data=load(LS.k,{days:{},current:0,best:0,lastDate:''});const d=today();data.days[d]=(data.days[d]||0)+n;data.lastDate=d;save(LS.k,data)}
 
 // === SPEECH ===
-function speak(text, lang='en-US') {
-  if (!soundOn || !('speechSynthesis' in window)) return;
-  doSpeak(text, lang);
+let soundOn=localStorage.getItem(LS.s)!=='off';
+function toggleSound(){soundOn=!soundOn;localStorage.setItem(LS.s,soundOn?'on':'off');render()}
+function doSpeak(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=0.85;const v=speechSynthesis.getVoices();const p=v.find(x=>x.lang.startsWith('en')&&x.name.includes('Google'))||v.find(x=>x.lang.startsWith('en')&&!x.localService)||v.find(x=>x.lang.startsWith('en'));if(p)u.voice=p;speechSynthesis.speak(u)}
+function speak(t){if(soundOn)doSpeak(t)}
+if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
+
+// === CONFIG ===
+const MT=0.7,LN={1:'Beginner',2:'Elementary',3:'Intermediate',4:'Upper-Inter.',5:'Advanced'};
+const LC={1:{bg:'from-green-400 to-emerald-500',t:'text-green-400',b:'bg-green-500'},2:{bg:'from-blue-400 to-cyan-500',t:'text-blue-400',b:'bg-blue-500'},3:{bg:'from-yellow-400 to-orange-500',t:'text-yellow-400',b:'bg-yellow-500'},4:{bg:'from-purple-400 to-violet-500',t:'text-purple-400',b:'bg-purple-500'},5:{bg:'from-red-400 to-rose-500',t:'text-red-400',b:'bg-red-500'}};
+const BG='min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)';
+
+function gP(l){const db=getDB();const ws=db[l]||[];if(!ws.length)return 0;return ws.filter((_,i)=>{const c=getCard(l,i);return c.st===2&&c.reps>=3}).length/ws.length}
+function gS(l){const db=getDB();const ws=db[l]||[];let m=0,lrn=0,nw=0;ws.forEach((_,i)=>{const c=getCard(l,i);if(c.st===2&&c.reps>=3)m++;else if(c.st>0)lrn++;else nw++});return{m,lrn,nw,t:ws.length}}
+function getUL(){const u=[1];for(let l=1;l<=4;l++)if(gP(l)>=MT)u.push(l+1);return u}
+
+// === ANALYTICS ENGINE ===
+const LS_LOG='vm2_log', LS_CONF='vm2_confusion';
+function logEvent(type,data){
+  const log=load(LS_LOG,[]);
+  log.push({t:Date.now(),type,...data});
+  // Keep last 5000 events
+  if(log.length>5000)log.splice(0,log.length-5000);
+  save(LS_LOG,log);
 }
-function doSpeak(text, lang='en-US') {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang;
-  u.rate = 0.85;
-  u.pitch = 1;
-  const voices = window.speechSynthesis.getVoices();
-  const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
-    || voices.find(v => v.lang.startsWith('en') && !v.localService)
-    || voices.find(v => v.lang.startsWith('en'));
-  if (preferred) u.voice = preferred;
-  window.speechSynthesis.speak(u);
+function logAnswer(word,level,grade,mode,responseMs,typed){
+  logEvent('answer',{w:word.w,tr:word.tr,lv:level,grade,mode,ms:responseMs,typed:typed||null});
+  // Track confusion pairs
+  if(grade===1 && typed){
+    const conf=load(LS_CONF,{});
+    const key=word.w.toLowerCase();
+    if(!conf[key])conf[key]={wrong:[],count:0};
+    conf[key].count++;
+    if(typed && typed!==word.w){
+      const existing=conf[key].wrong.find(x=>x.v===typed);
+      if(existing)existing.n++;else conf[key].wrong.push({v:typed,n:1});
+      conf[key].wrong.sort((a,b)=>b.n-a.n);
+      if(conf[key].wrong.length>5)conf[key].wrong=conf[key].wrong.slice(0,5);
+    }
+    save(LS_CONF,conf);
+  }
 }
-// Preload voices
-if ('speechSynthesis' in window) {
-  window.speechSynthesis.getVoices();
-  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+function getAnalytics(){
+  const log=load(LS_LOG,[]);const now=Date.now();const day=86400000;
+  const today_start=new Date();today_start.setHours(0,0,0,0);const ts=today_start.getTime();
+  const answers=log.filter(e=>e.type==='answer');
+  const todayA=answers.filter(e=>e.t>=ts);
+  const weekA=answers.filter(e=>e.t>=now-7*day);
+  // Accuracy
+  const todayAcc=todayA.length?Math.round(todayA.filter(e=>e.grade>=3).length/todayA.length*100):0;
+  const weekAcc=weekA.length?Math.round(weekA.filter(e=>e.grade>=3).length/weekA.length*100):0;
+  const allAcc=answers.length?Math.round(answers.filter(e=>e.grade>=3).length/answers.length*100):0;
+  // Avg response time
+  const avgMs=answers.length?Math.round(answers.reduce((s,e)=>s+(e.ms||0),0)/answers.length):0;
+  const todayAvgMs=todayA.length?Math.round(todayA.reduce((s,e)=>s+(e.ms||0),0)/todayA.length):0;
+  // Words per day (last 14 days)
+  const dailyCounts={};for(let i=13;i>=0;i--){const d=new Date(now-i*day);const ds=d.toISOString().slice(0,10);dailyCounts[ds]=0}
+  answers.forEach(e=>{const ds=new Date(e.t).toISOString().slice(0,10);if(dailyCounts[ds]!==undefined)dailyCounts[ds]++});
+  // Accuracy by level
+  const byLevel={};answers.forEach(e=>{if(!byLevel[e.lv])byLevel[e.lv]={ok:0,total:0};byLevel[e.lv].total++;if(e.grade>=3)byLevel[e.lv].ok++});
+  // Hardest words (most lapses)
+  const wordStats={};answers.forEach(e=>{const k=e.w;if(!wordStats[k])wordStats[k]={w:e.w,tr:e.tr,ok:0,fail:0,totalMs:0,n:0};wordStats[k].n++;wordStats[k].totalMs+=(e.ms||0);if(e.grade>=3)wordStats[k].ok++;else wordStats[k].fail++});
+  const hardest=Object.values(wordStats).filter(w=>w.fail>=2).sort((a,b)=>b.fail-a.fail).slice(0,10);
+  const fastest=Object.values(wordStats).filter(w=>w.n>=3).sort((a,b)=>(a.totalMs/a.n)-(b.totalMs/b.n)).slice(0,5);
+  const slowest=Object.values(wordStats).filter(w=>w.n>=3).sort((a,b)=>(b.totalMs/b.n)-(a.totalMs/a.n)).slice(0,5);
+  // Confusion pairs
+  const conf=load(LS_CONF,{});
+  const confused=Object.entries(conf).filter(([k,v])=>v.count>=2&&v.wrong.length>0).sort((a,b)=>b[1].count-a[1].count).slice(0,10);
+  // Session history (last 7 days)
+  const sessions=[];let cur=null;
+  answers.forEach(e=>{if(!cur||e.t-cur.end>300000){if(cur)sessions.push(cur);cur={start:e.t,end:e.t,n:0,ok:0}}cur.end=e.t;cur.n++;if(e.grade>=3)cur.ok++});
+  if(cur)sessions.push(cur);
+  const recentSessions=sessions.filter(s=>s.start>=now-7*day).slice(-10);
+  return{todayA:todayA.length,weekA:weekA.length,allA:answers.length,todayAcc,weekAcc,allAcc,avgMs,todayAvgMs,dailyCounts,byLevel,hardest,fastest,slowest,confused,recentSessions,totalEvents:log.length};
 }
 
+// Response timer
+let cardShownAt=0;
+
+// === STATE ===
+let S={sc:'levels',cL:1,cI:0,sA:false,sH:false,sQ:[],sR:[],sM:null,typed:'',cOpts:[],cAns:null,readRaw:'',sentenceResult:null};
+let touchX=0;
+
+// === BUILD STUDY QUEUE ===
+function buildQueue(lv,mode){
+  const db=getDB();const ws=db[lv]||[];const now=Date.now();let q=[];
+  if(mode==='daily'){
+    const items=getDailyReview();q=items.map(x=>({w:db[x.l][x.i][0],tr:db[x.l][x.i][1],ex:db[x.l][x.i][2],h:db[x.l][x.i][3],lv:x.l,i:x.i,mode:0}));
+    if(q.length>30)q=q.slice(0,30);
+  }else{
+    const due=[];const nw=[];const lrn=[];
+    ws.forEach((w,i)=>{const c=getCard(lv,i);const item={w:w[0],tr:w[1],ex:w[2],h:w[3],lv,i,mode:0};
+      if(c.st===0)nw.push(item);else if(c.due<=now)due.push(item);else if(c.st===1||c.st===3)lrn.push(item)});
+    // Mix: due first, then learning, then new (limited)
+    const nt=getNewToday(lv);const newLimit=Math.max(0,NEW_PER_DAY-nt.introduced);
+    if(mode==='new')q=nw.slice(0,Math.min(20,newLimit));
+    else if(mode==='due')q=due.slice(0,30);
+    else{q=[...due,...lrn,...nw.slice(0,Math.min(10,newLimit))];if(q.length>25)q=q.slice(0,25)}
+  }
+  return q;
+}
+
+function go(lv,mode){
+  const q=buildQueue(lv,mode);if(!q.length){toast('Нет карточек для изучения','#6366f1');return}
+  logEvent('session_start',{lv,mode:mode||'mix',cards:q.length});
+  S.sQ=q;S.cI=0;S.sA=false;S.sH=false;S.sR=[];S.cL=lv;S.sM=null;S.sc='study';S.typed='';S.cOpts=[];S.cAns=null;render();
+}
+function goDaily(){
+  const items=getDailyReview();if(!items.length){toast('Все повторения сделаны! 🎉','#6366f1');return}
+  const db=getDB();const q=items.slice(0,30).map(x=>({w:db[x.l][x.i][0],tr:db[x.l][x.i][1],ex:db[x.l][x.i][2],h:db[x.l][x.i][3],lv:x.l,i:x.i,mode:0}));
+  S.sQ=q;S.cI=0;S.sA=false;S.sH=false;S.sR=[];S.cL=0;S.sM=null;S.sc='study';S.typed='';S.cOpts=[];S.cAns=null;render();
+}
+
+function trainConfused(){
+  const conf=load(LS_CONF,{});const db=getDB();const q=[];
+  const confWords=Object.entries(conf).filter(([k,v])=>v.count>=2).sort((a,b)=>b[1].count-a[1].count).slice(0,20);
+  // Find these words in DB
+  for(const [word,data] of confWords){
+    for(let l=1;l<=5;l++){const ws=db[l]||[];
+      const idx=ws.findIndex(w=>w[0].toLowerCase()===word);
+      if(idx!==-1){
+        // Add in multiple modes for better drilling
+        q.push({w:ws[idx][0],tr:ws[idx][1],ex:ws[idx][2],h:ws[idx][3],lv:l,i:idx,mode:0});
+        q.push({w:ws[idx][0],tr:ws[idx][1],ex:ws[idx][2],h:ws[idx][3],lv:l,i:idx,mode:2});
+        q.push({w:ws[idx][0],tr:ws[idx][1],ex:ws[idx][2],h:ws[idx][3],lv:l,i:idx,mode:3});
+        break;
+      }
+    }
+  }
+  if(!q.length){toast('Нет проблемных слов','#6366f1');return}
+  // Shuffle
+  for(let i=q.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[q[i],q[j]]=[q[j],q[i]]}
+  S.sQ=q.slice(0,30);S.cI=0;S.sA=false;S.sH=false;S.sR=[];S.cL=0;S.sM=null;S.sc='study';S.typed='';S.cOpts=[];S.cAns=null;
+  toast('Тренировка проблемных слов 🎯');render();
+}
+
+function getRandChoices(cW){
+  const db=getDB();const ws=db[cW.lv]||[];const others=ws.filter(w=>w[1]!==cW.tr).sort(()=>Math.random()-.5).slice(0,3);
+  const opts=others.map(w=>w[1]);opts.push(cW.tr);return opts.sort(()=>Math.random()-.5);
+}
+
+function ans(grade){
+  const cW=S.sQ[S.cI];if(!cW)return;
+  const responseMs=Date.now()-cardShownAt;
+  const c=reviewCard(cW.lv,cW.i,grade);
+  if(!c.firstSeen)c.firstSeen=today();saveCard(cW.lv,cW.i,c);
+  logAnswer(cW,cW.lv,grade,cW.mode,responseMs,S.typed||null);
+  S.sR.push({...cW,ok:grade>=3});addStudied(1);
+  if(grade===1){const nm=(cW.mode+1)%5;const at=Math.min(S.cI+3+Math.floor(Math.random()*3),S.sQ.length);S.sQ.splice(at,0,{...cW,mode:nm})}
+  const card=document.getElementById('card');if(card)card.className='rounded-2xl p-6 text-center transition-all '+(grade>=3?'ag':'ar');
+  S.typed='';S.cAns=null;S.cOpts=[];S.sentenceResult=null;
+  setTimeout(()=>{if(S.cI+1<S.sQ.length){S.cI++;S.sA=false;S.sH=false;render();}else{S.sc='results';render();}},500);
+}
+function checkChoice(val){const cW=S.sQ[S.cI];S.cAns=val;S.typed=val;S.sA=true;render();setTimeout(()=>ans(val===cW.tr?3:1),600)}
+function checkTyped(){const cW=S.sQ[S.cI];const v=(document.getElementById('ti')||{}).value||'';S.typed=v;S.sA=true;render();setTimeout(()=>ans(v.toLowerCase().trim()===cW.w.toLowerCase().trim()?3:1),800)}
+
+// === EXPORT/IMPORT ===
+function exportData(){
+  const data={progress:load(LS.p,{}),userWords:loadUW(),streak:load(LS.k,{}),version:2,date:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vocabmaster-backup-'+today()+'.json';a.click();toast('Экспорт сохранён!')
+}
+function importData(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{
+    try{const d=JSON.parse(ev.target.result);if(d.progress)save(LS.p,d.progress);if(d.userWords)save(LS.u,d.userWords);if(d.streak)save(LS.k,d.streak);
+    toast('Импорт завершён! Прогресс восстановлен.');render()}catch(e){toast('Ошибка файла!','#ef4444')}};r.readAsText(f)};inp.click()
+}
+
+// === ADD WORDS ===
+function addSingle(){
+  const w=document.getElementById('aw-w').value.trim(),t=document.getElementById('aw-t').value.trim();
+  const e=document.getElementById('aw-e').value.trim()||w+'.',h=document.getElementById('aw-h').value.trim()||t.split(' ')[0];
+  const l=+document.getElementById('aw-l').value;
+  if(!w||!t){toast('Заполни слово и перевод!','#ef4444');return}
+  const uw=loadUW();uw[l].push([w,t,e,h]);save(LS.u,uw);toast('+1: '+w);
+  ['aw-w','aw-t','aw-e','aw-h'].forEach(id=>document.getElementById(id).value='');
+}
+function importBulk(){
+  const txt=document.getElementById('imp-txt').value.trim(),l=+document.getElementById('imp-l').value;
+  if(!txt){toast('Вставь текст!','#ef4444');return}
+  const uw=loadUW();let n=0;
+  txt.split('\n').filter(x=>x.trim()).forEach(line=>{
+    let p;if(line.includes(';'))p=line.split(';');else if(line.includes('\t'))p=line.split('\t');else if(line.includes(' - '))p=line.split(' - ');else if(line.includes(' — '))p=line.split(' — ');else return;
+    p=p.map(x=>x.trim());if(p.length>=2){uw[l].push([p[0],p[1],p[2]||p[0]+'.',p[3]||p[1].split(' ')[0]]);n++}
+  });save(LS.u,uw);toast('+'+n+' слов');document.getElementById('imp-txt').value='';
+}
+
+// === PARSE TEXT ===
+const STOP=new Set('i me my we our you your he him his she her it its they them their a an the this that is am are was were be been have has had do does did will would shall should can could may might must to of in for on with at by from as into about through during before after above below up down and but or not no so if then than too very just also still even now here there where when how what which who why all each every both few more most other some such only own same well back get got go went come came make made take took see saw know knew think say said tell told give gave find found let put seem show try ask use call keep much many way thing man day time year people world life part place week point right left while because since until although though once us'.split(' '));
+let parsed=[];
+function parseText(){
+  const txt=document.getElementById('pt-txt').value.trim();if(!txt){toast('Вставь текст!','#ef4444');return}
+  const db=getDB();const exist=new Set();Object.values(db).forEach(l=>l.forEach(w=>exist.add(w[0].toLowerCase())));
+  const raw=txt.toLowerCase().replace(/[^a-z\s'-]/g,' ').split(/\s+/).filter(w=>w.length>=3&&/^[a-z]/.test(w));
+  let unique=[...new Set(raw)].filter(w=>!STOP.has(w)&&!exist.has(w));
+  if(!unique.length){document.getElementById('pt-res').innerHTML='<div class="text-slate-500 text-sm text-center mt-3">Новых слов не найдено</div>';return}
+  document.getElementById('pt-btn').textContent='⏳...';document.getElementById('pt-btn').disabled=true;
+  const batches=[];for(let i=0;i<unique.length;i+=10)batches.push(unique.slice(i,i+10));
+  parsed=[];
+  Promise.all(batches.map(b=>{
+    return fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(b.join(' | '))+'&langpair=en|ru')
+      .then(r=>r.json()).then(d=>{const tr=(d.responseData.translatedText||'').split(' | ');
+      b.forEach((w,i)=>{const t=(tr[i]||'').trim().toLowerCase();parsed.push({w,tr:t&&t!==w?t:'???',on:t&&t!==w})})}).catch(()=>b.forEach(w=>parsed.push({w,tr:'???',on:false})))
+  })).then(()=>{document.getElementById('pt-btn').textContent='🔍 Извлечь';document.getElementById('pt-btn').disabled=false;showParsed()});
+}
+function showParsed(){
+  let h='<div class="mt-2 max-h-60 overflow-y-auto space-y-1">';
+  parsed.forEach((p,i)=>{h+=`<div class="flex items-center gap-2 py-1 border-b border-slate-700/30"><input type="checkbox" ${p.on?'checked':''} onchange="parsed[${i}].on=this.checked" class="shrink-0 accent-green-500"><span class="text-white text-sm flex-1">${p.w}</span><input value="${p.tr}" onchange="parsed[${i}].tr=this.value" class="w-28 text-xs py-1 px-2" style="background:#0f172a;border:1px solid #334155;border-radius:6px"></div>`});
+  h+='</div><button onclick="addParsed()" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold active:scale-95">Добавить выбранные</button>';
+  document.getElementById('pt-res').innerHTML=h;
+}
+function addParsed(){
+  const l=+document.getElementById('pt-l').value;const uw=loadUW();let n=0;
+  parsed.filter(p=>p.on&&p.tr!=='???').forEach(p=>{uw[l].push([p.w,p.tr,p.w+'.',p.tr.split(' ')[0]]);n++});
+  save(LS.u,uw);toast('+'+n+' слов');parsed=[];document.getElementById('pt-res').innerHTML='';document.getElementById('pt-txt').value='';
+}
+
+// === RENDER ===
 function render(){
-  const a=document.getElementById('app');
-  const uL=getUL();
+  const a=document.getElementById('app');const uL=getUL();const db=getDB();const streak=getStreak();
+  const totalDue=getDailyReview().length;
 
-  // MODE SELECT
-  if(state.sM!==null){
-    const l=state.sM,s=gS(l),c=LC[l];
-    a.innerHTML=`<div style="min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)" class="p-4"><div class="max-w-md mx-auto">
-    <button onclick="state.sM=null;render()" class="text-slate-400 text-sm mb-4">← Назад</button>
-    <div class="text-center mb-6"><div class="w-16 h-16 rounded-full bg-gradient-to-br ${c.bg} mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white shadow-lg">${l}</div><h2 class="text-xl font-bold text-white">Уровень ${l} — ${LN[l]}</h2><p class="text-slate-400 text-sm mt-1">${s.t} слов — ${s.m} освоено</p></div>
+  // ONBOARDING INTRO
+  if(S.sc==='onboard_intro'){
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center" style="padding-top:15vh">
+    <div class="text-6xl mb-6">📚</div>
+    <h1 class="text-3xl font-bold text-white mb-3">VocabMaster</h1>
+    <p class="text-slate-400 mb-8">Умное приложение для изучения английских слов с AI, интервальным повторением и мини-играми</p>
+    <button onclick="startOnboarding()" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95 mb-3">🎯 Определить мой уровень</button>
+    <button onclick="save('vm2_onboarded',true);S.sc='levels';render()" class="w-full py-3 rounded-xl bg-slate-800 text-slate-400 text-sm">Пропустить тест →</button>
+    </div></div>`;return}
+
+  // ONBOARDING
+  if(S.sc==='onboard'){
+    if(!onboard.done){
+      const w=ONBOARD_WORDS[onboard.idx];const pct=Math.round((onboard.idx/ONBOARD_WORDS.length)*100);
+      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
+      <h2 class="text-xl font-bold text-white mb-2">🎯 Определим твой уровень</h2>
+      <p class="text-slate-400 text-xs mb-4">Знаешь ли ты перевод этого слова?</p>
+      <div class="h-1.5 bg-slate-700 rounded-full mb-6 overflow-hidden"><div class="h-full bg-gradient-to-r from-green-400 to-indigo-500 rounded-full" style="width:${pct}%"></div></div>
+      <div class="text-slate-500 text-xs mb-2">${onboard.idx+1}/${ONBOARD_WORDS.length}</div>
+      <div class="bg-slate-800 rounded-2xl p-8 mb-6">
+        <div class="text-4xl font-bold text-white mb-2">${w[0]}</div>
+        <button onclick="doSpeak('${w[0]}')" class="text-blue-400 text-2xl mb-4 active:scale-90">🔊</button>
+        <div class="text-slate-500 text-xs">Уровень ${w[2]} — ${LN[w[2]]}</div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="onboardAnswer(false)" class="flex-1 py-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 font-bold text-lg active:scale-95">Не знаю</button>
+        <button onclick="onboardAnswer(true)" class="flex-1 py-4 rounded-xl bg-green-500/20 border border-green-500/50 text-green-400 font-bold text-lg active:scale-95">Знаю ✓</button>
+      </div>
+      </div></div>`;
+    }else{
+      let lvlResults='';for(let l=1;l<=5;l++){const s=onboard.byLv[l];if(!s)continue;const pct=Math.round(s.ok/s.n*100);
+        lvlResults+=`<div class="flex items-center gap-2 mb-1"><span class="text-slate-400 text-xs w-8">Ур.${l}</span><div class="flex-1 h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full ${LC[l].b} rounded-full" style="width:${pct}%"></div></div><span class="text-white text-xs w-10 text-right">${pct}%</span></div>`}
+      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
+      <div class="text-5xl mb-4">🎉</div>
+      <h2 class="text-2xl font-bold text-white mb-2">Тест завершён!</h2>
+      <div class="bg-slate-800 rounded-2xl p-6 mt-4">
+        <div class="text-slate-400 text-sm mb-2">Твой уровень:</div>
+        <div class="text-4xl font-bold text-white mb-1">${onboard.suggestedLevel}</div>
+        <div class="text-indigo-400 font-semibold">${LN[onboard.suggestedLevel]}</div>
+        <div class="mt-4 text-left">${lvlResults}</div>
+      </div>
+      <button onclick="S.sc='levels';render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать обучение! 🚀</button>
+      </div></div>`;
+    }
+    return}
+
+  // ACHIEVEMENTS
+  if(S.sc==='badges'){
+    const unlocked=getUnlockedBadges();const uIds=new Set(unlocked.map(b=>b.id));
+    let cards='';BADGES.forEach(b=>{const got=uIds.has(b.id);
+      cards+=`<div class="flex items-center gap-3 py-3 border-b border-slate-700/30 ${got?'':'opacity-40'}">
+        <div class="text-3xl ${got?'':'grayscale'}">${b.icon}</div>
+        <div class="flex-1"><div class="text-white text-sm font-semibold">${b.name}</div><div class="text-slate-400 text-xs">${b.desc}</div></div>
+        ${got?'<span class="text-green-400 text-xs">✅</span>':'<span class="text-slate-600 text-xs">🔒</span>'}
+      </div>`});
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-1">🏆 Достижения</h2>
+    <p class="text-slate-400 text-xs mb-4">${unlocked.length}/${BADGES.length} открыто</p>
+    <div class="h-2 bg-slate-700 rounded-full overflow-hidden mb-4"><div class="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full" style="width:${(unlocked.length/BADGES.length)*100}%"></div></div>
+    <div class="bg-slate-800 rounded-xl p-4">${cards}</div>
+    </div></div>`;return}
+
+  // MINI-GAMES
+  if(S.sc==='games'){
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-4">🎮 Мини-игры</h2>
     <div class="space-y-3">
-    <button onclick="go(${l})" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left"><div class="text-white font-semibold">📚 Все слова <span class="text-slate-400 text-sm">(по ${BS})</span></div></button>
-    ${s.n+s.p>0?`<button onclick="go(${l},'u')" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left"><div class="text-amber-400 font-semibold">🆕 Неосвоенные (${s.t-s.m})</div></button>`:''}
-    ${s.m>0?`<button onclick="go(${l},'r')" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left"><div class="text-green-400 font-semibold">🔄 Повторение (${s.m})</div></button>`:''}
-    </div></div></div>`;return;
+      <button onclick="startGame('match')" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left">
+        <div class="text-white font-semibold">🔗 Word Match</div>
+        <div class="text-slate-400 text-xs">Соедини слова с переводами. 60 сек.</div></button>
+      <button onclick="startGame('scramble')" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left">
+        <div class="text-white font-semibold">🔀 Word Scramble</div>
+        <div class="text-slate-400 text-xs">Собери слово из перемешанных букв.</div></button>
+      <button onclick="startGame('speed')" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left">
+        <div class="text-white font-semibold">⚡ Speed Round</div>
+        <div class="text-slate-400 text-xs">Сколько слов за 60 секунд?</div></button>
+    </div></div></div>`;return}
+
+  // GAME SCREEN
+  if(S.sc==='game'){
+    const isEnd=game.type.endsWith('_end');const baseType=game.type.replace('_end','');
+
+    if(isEnd){
+      checkNewBadges();
+      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
+      <div class="text-5xl mb-4">🏆</div><h2 class="text-2xl font-bold text-white mb-2">Результат!</h2>
+      <div class="bg-slate-800 rounded-2xl p-8 mt-4"><div class="text-5xl font-bold text-amber-400 mb-2">${game.score}</div><div class="text-slate-400">очков</div>
+      ${baseType==='speed'?`<div class="text-white mt-2">${game.roundIdx} слов за 60 сек</div>`:''}</div>
+      <div class="flex gap-3 mt-6"><button onclick="startGame('${baseType}')" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold active:scale-95">🔄 Ещё</button><button onclick="S.sc='games';render()" class="flex-1 py-3 rounded-xl bg-slate-700 text-white font-semibold active:scale-95">🎮 Игры</button></div>
+      </div></div>`;return;
+    }
+
+    // Match game
+    if(baseType==='match'){
+      const cards=game.pairs.map(p=>{const done=game.matched.includes(p.id);const sel=game.selected&&game.selected.id===p.id;
+        return`<button onclick="${done?'':`selectCard('${p.id}')`}" class="py-2 px-3 rounded-lg text-sm font-medium transition-all ${done?'bg-green-900/40 text-green-400 opacity-50':sel?'bg-indigo-600 text-white ring-2 ring-indigo-400':'bg-slate-700 text-white hover:bg-slate-600'} ${p.type==='trans'?'italic':''}">${p.text}</button>`}).join('');
+      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+      <div class="flex items-center justify-between mb-4"><button onclick="clearInterval(game.timerRef);S.sc='games';render()" class="text-slate-400 text-sm">← Назад</button><div class="text-white font-bold">🔗 Match</div><div class="flex gap-3"><span class="text-amber-400 text-sm">★${game.score}</span><span class="text-slate-400 text-sm">${game.timer}s</span></div></div>
+      <div class="grid grid-cols-3 gap-2">${cards}</div>
+      </div></div>`;return;
+    }
+
+    // Scramble game
+    if(baseType==='scramble'){
+      const w=game.roundWords[game.roundIdx];if(!w){endGame();return}
+      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
+      <div class="flex items-center justify-between mb-4"><button onclick="S.sc='games';render()" class="text-slate-400 text-sm">←</button><div class="text-white font-bold">🔀 Scramble</div><div class="flex gap-3"><span class="text-amber-400 text-sm">★${game.score}</span><span class="text-slate-400 text-sm">${game.roundIdx+1}/${game.roundWords.length}</span></div></div>
+      <div class="bg-slate-800 rounded-2xl p-6 mb-4">
+        <div class="text-cyan-300 text-sm mb-3">${w.tr}</div>
+        <div class="text-4xl font-bold text-white mb-4 tracking-widest font-mono">${game.scramble.split('').map(c=>`<span class="inline-block mx-1 bg-slate-700 rounded px-2 py-1">${c}</span>`).join('')}</div>
+        <input id="scramble-input" type="text" placeholder="Type the word..." class="text-center text-lg mb-3" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')checkScramble()">
+        <button onclick="checkScramble()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold active:scale-95">Проверить</button>
+        <div class="text-slate-500 text-xs mt-2">Попытка ${game.attempts+1}/3</div>
+      </div></div></div>`;
+      setTimeout(()=>{const i=document.getElementById('scramble-input');if(i)i.focus()},100);return;
+    }
+
+    // Speed round
+    if(baseType==='speed'){
+      const w=game.roundWords[game.roundIdx];if(!w){endGame();return}
+      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
+      <div class="flex items-center justify-between mb-4"><button onclick="clearInterval(game.timerRef);S.sc='games';render()" class="text-slate-400 text-sm">←</button><div class="text-white font-bold">⚡ Speed</div><div class="flex gap-3"><span class="text-amber-400 text-sm">★${game.score}</span><span class="${game.timer<=10?'text-red-400':'text-slate-400'} text-sm font-mono">${game.timer}s</span></div></div>
+      <div class="bg-slate-800 rounded-2xl p-6 mb-4">
+        <div class="text-4xl font-bold text-white mb-3">${w.w}</div>
+        <button onclick="doSpeak('${w.w}')" class="text-blue-400 text-2xl mb-4 active:scale-90">🔊</button>
+        <div class="text-xl text-cyan-300 mb-6">${w.tr}?</div>
+        <div class="flex gap-3">
+          <button onclick="speedAnswer(false)" class="flex-1 py-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 font-bold text-xl active:scale-95">✗</button>
+          <button onclick="speedAnswer(true)" class="flex-1 py-4 rounded-xl bg-green-500/20 border border-green-500/50 text-green-400 font-bold text-xl active:scale-95">✓</button>
+        </div>
+      </div></div></div>`;return;
+    }
   }
 
+  // AUDIO MODE
+  if(S.sc==='audio'){
+    const item=audioQueue[audioIdx]||audioQueue[audioQueue.length-1];
+    const pct=audioQueue.length?Math.round(((audioIdx+1)/audioQueue.length)*100):0;
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
+    <div class="flex items-center justify-between mb-6"><button onclick="stopAudio()" class="text-slate-400 text-sm">✕ Стоп</button><div class="text-white font-semibold">🎧 Аудио</div><div class="text-slate-400 text-sm">${audioIdx+1}/${audioQueue.length}</div></div>
+    <div class="h-1.5 bg-slate-700 rounded-full mb-8 overflow-hidden"><div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all" style="width:${pct}%"></div></div>
+    <div class="bg-slate-800 rounded-2xl p-8 mb-6">
+      <div class="text-5xl font-bold text-white mb-4">${item?item.w:'...'}</div>
+      <div class="text-2xl text-cyan-300 mb-2">${item?item.tr:''}</div>
+      <div class="text-slate-400 text-sm italic">${item?item.ex:''}</div>
+    </div>
+    <div class="flex justify-center gap-4 mb-6">
+      <button onclick="audioBack()" class="w-14 h-14 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-2xl active:scale-90">⏮</button>
+      <button onclick="toggleAudioPause()" class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-3xl text-white shadow-lg active:scale-90">${audioPaused?'▶️':'⏸'}</button>
+      <button onclick="audioSkip()" class="w-14 h-14 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-2xl active:scale-90">⏭</button>
+    </div>
+    <div class="text-slate-500 text-xs">Слушай и запоминай. Можно заблокировать экран.</div>
+    </div></div>`;return}
+
+  // TOPICS
+  if(S.sc==='topics'){
+    let cards='';
+    Object.entries(TOPICS).forEach(([name,words])=>{
+      const db=getDB();let known=0,total=0;
+      words.forEach(w=>{for(let l=1;l<=5;l++){const ws=db[l]||[];const idx=ws.findIndex(x=>x[0].toLowerCase()===w);
+        if(idx!==-1){total++;const c=getCard(l,idx);if(c.st===2&&c.reps>=3)known++;break}}});
+      const pct=total?Math.round(known/total*100):0;
+      cards+=`<button onclick="goTopic('${name}')" class="bg-slate-800 hover:bg-slate-700 rounded-xl p-3 text-left transition-all">
+        <div class="flex items-center justify-between mb-1"><span class="text-white font-semibold text-sm">${name}</span><span class="text-slate-400 text-xs">${known}/${total}</span></div>
+        <div class="h-1.5 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:${pct}%"></div></div>
+      </button>`;
+    });
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-4">🏷 Темы</h2>
+    <div class="grid grid-cols-2 gap-3">${cards}</div>
+    </div></div>`;return}
+
+  // AI TUTOR
+  if(S.sc==='tutor'){
+    const cfg=getAIConfig();const hasKey=!!cfg.key;
+    const chatHtml=tutorChat.map(m=>{
+      if(m.role==='user')return`<div class="flex justify-end mb-2"><div class="bg-indigo-600 rounded-2xl rounded-br-sm px-4 py-2 max-w-xs"><div class="text-white text-sm">${m.text}</div></div></div>`;
+      return`<div class="flex justify-start mb-2"><div class="bg-slate-800 rounded-2xl rounded-bl-sm px-4 py-2 max-w-xs"><div class="text-slate-200 text-sm leading-relaxed">${m.loading?'<span class="animate-pulse">⏳ Думаю...</span>':formatAIText(m.text)}</div></div></div>`;
+    }).join('');
+    const wordHeader=tutorWord?`<div class="bg-slate-800 rounded-xl p-3 mb-3 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br ${(LC[tutorWord.lv]||LC[1]).bg} flex items-center justify-center text-white font-bold">${tutorWord.lv||'?'}</div>
+      <div class="flex-1"><div class="text-white font-bold text-lg">${tutorWord.w} <button onclick="doSpeak('${tutorWord.w}')" class="text-blue-400 text-base">🔊</button></div><div class="text-cyan-300 text-sm">${tutorWord.tr}</div></div>
+    </div>`:'';
+
+    a.innerHTML=`<div style="${BG}" class="p-4 pb-24"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-3">🤖 AI Тьютор</h2>
+    ${!hasKey?`<div class="bg-amber-900/30 border border-amber-500/30 rounded-xl p-4 mb-4">
+      <div class="text-amber-400 font-semibold text-sm mb-2">Нужен API ключ</div>
+      <div class="text-slate-400 text-xs mb-3">Получи ключ на <a href="https://console.anthropic.com" target="_blank" class="text-blue-400 underline">console.anthropic.com</a></div>
+      <input id="ai-key-input" type="password" placeholder="sk-ant-..." class="mb-2 text-sm" value="${cfg.key}">
+      <button onclick="const c=getAIConfig();c.key=document.getElementById('ai-key-input').value.trim();saveAIConfig(c);render()" class="w-full py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm active:scale-95">Сохранить</button>
+    </div>`:''}
+    ${wordHeader}
+    ${tutorWord?`<div class="flex flex-wrap gap-2 mb-4">
+      <button onclick="tutorAsk('explain')" class="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs active:scale-95">📝 Объясни</button>
+      <button onclick="tutorAsk('mnemonic')" class="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs active:scale-95">🧠 Мнемоника</button>
+      <button onclick="tutorAsk('examples')" class="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs active:scale-95">💬 Примеры</button>
+      <button onclick="tutorAsk('difference')" class="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs active:scale-95">🔀 Разница</button>
+      <button onclick="tutorAsk('usage')" class="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs active:scale-95">🗣 Как использовать</button>
+    </div>`:''}
+    <div id="tutor-chat" class="mb-4 max-h-96 overflow-y-auto">${chatHtml}</div>
+    </div></div>
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 p-3 z-50"><div class="max-w-md mx-auto flex gap-2">
+      <input id="tutor-input" placeholder="${tutorWord?'Спроси про '+tutorWord.w+'...':'Задай вопрос...'}" class="flex-1 text-sm py-2" onkeydown="if(event.key==='Enter')tutorCustom()">
+      <button onclick="tutorCustom()" class="py-2 px-4 rounded-xl bg-indigo-600 text-white font-semibold text-sm active:scale-95">→</button>
+    </div></div>`;
+    // Scroll chat to bottom
+    setTimeout(()=>{const ch=document.getElementById('tutor-chat');if(ch)ch.scrollTop=ch.scrollHeight},100);
+    return}
+
+  // READING MODE
+  if(S.sc==='read'){
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-2">📖 Режим чтения</h2>
+    <p class="text-slate-400 text-xs mb-3">Вставь текст — слова подсветятся по уровню знания. Нажми на слово чтобы добавить.</p>
+    <textarea id="read-input" rows="5" placeholder="Paste any English text here...">${S.readRaw||''}</textarea>
+    <div class="flex gap-2 mt-2 mb-3">
+      <button onclick="analyzeText()" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold text-sm active:scale-95">🔍 Анализировать</button>
+      <button onclick="document.getElementById('read-input').value='';S.readRaw='';document.getElementById('read-out').innerHTML='';document.getElementById('read-stats').innerHTML=''" class="py-2 px-4 rounded-xl bg-slate-800 text-slate-400 text-sm active:scale-95">✕</button>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-3 text-xs">
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-500/60"></span> Знаю</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-500/60"></span> Учу</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-500/60"></span> Не знаю</span>
+      <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-700"></span> Стоп-слова</span>
+    </div>
+    <div id="read-stats" class="mb-3"></div>
+    <div id="read-out" class="bg-slate-800 rounded-xl p-4 text-sm leading-relaxed min-h-16"></div>
+    <div id="read-popup" style="display:none" class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 p-4 z-50">
+      <div class="max-w-md mx-auto">
+        <div class="flex items-center justify-between mb-2">
+          <div><span id="rp-word" class="text-white font-bold text-lg"></span> <button onclick="doSpeak(document.getElementById('rp-word').textContent)" class="text-blue-400 text-lg">🔊</button></div>
+          <button onclick="document.getElementById('read-popup').style.display='none'" class="text-slate-400 text-xl">✕</button>
+        </div>
+        <div id="rp-trans" class="text-cyan-300 mb-2"></div>
+        <div id="rp-status" class="text-slate-400 text-xs mb-3"></div>
+        <div class="flex gap-2">
+          <select id="rp-level" class="flex-1 text-sm py-2"><option value="1">1 Beginner</option><option value="2" selected>2 Elementary</option><option value="3">3 Intermediate</option><option value="4">4 Upper-Int.</option><option value="5">5 Advanced</option></select>
+          <button onclick="addFromReader()" id="rp-add-btn" class="py-2 px-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold text-sm active:scale-95">➕</button>
+          <button onclick="if(pendingReadWord){openTutor(pendingReadWord.w,pendingReadWord.autoTr||pendingReadWord.tr||'?','',2);document.getElementById('read-popup').style.display='none'}" class="py-2 px-3 rounded-xl bg-purple-600 text-white font-semibold text-sm active:scale-95">🤖</button>
+        </div>
+      </div>
+    </div>
+    </div></div>`;return}
+
+  // ANALYTICS DASHBOARD
+  if(S.sc==='analytics'){
+    const an=getAnalytics();
+    // Daily chart (bars)
+    const dc=an.dailyCounts;const dcKeys=Object.keys(dc);const dcMax=Math.max(...Object.values(dc),1);
+    let bars='';dcKeys.forEach(d=>{const v=dc[d];const h=Math.max(2,Math.round(v/dcMax*80));const isToday=d===today();
+      bars+=`<div class="flex flex-col items-center gap-1" title="${d}: ${v}"><div class="w-4 rounded-t ${isToday?'bg-amber-400':'bg-indigo-500'}" style="height:${h}px"></div><div class="text-slate-600 text-xs" style="font-size:8px;writing-mode:vertical-lr">${d.slice(5)}</div></div>`});
+    // Level accuracy
+    let lvlBars='';for(let l=1;l<=5;l++){const s=an.byLevel[l];if(!s)continue;const acc=Math.round(s.ok/s.total*100);const c=LC[l];
+      lvlBars+=`<div class="flex items-center gap-2 mb-1"><span class="text-slate-400 text-xs w-6">Ур.${l}</span><div class="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden"><div class="h-full ${c.b} rounded-full" style="width:${acc}%"></div></div><span class="text-slate-400 text-xs w-10 text-right">${acc}%</span></div>`}
+    // Hardest words
+    let hardList='';an.hardest.forEach(w=>{const acc=w.n?Math.round(w.ok/w.n*100):0;
+      hardList+=`<div class="flex items-center justify-between py-1 border-b border-slate-700/30"><div><span class="text-white text-sm">${w.w}</span> <span class="text-slate-500 text-xs">${w.tr}</span></div><div class="flex items-center gap-2"><button onclick="openTutor('${w.w}','${(w.tr||'').replace(/'/g,"\\'")}','',0)" class="text-purple-400 text-xs">🤖</button><span class="text-red-400 text-xs">${w.fail}err</span><span class="text-slate-500 text-xs">${acc}%</span></div></div>`});
+    // Confused pairs
+    let confList='';an.confused.forEach(([word,data])=>{
+      confList+=`<div class="py-2 border-b border-slate-700/30"><div class="flex items-center justify-between"><span class="text-white text-sm font-semibold">${word}</span><span class="text-red-400 text-xs">${data.count} ошибок</span></div><div class="flex flex-wrap gap-1 mt-1">${data.wrong.map(w=>`<span class="bg-red-900/30 text-red-300 text-xs px-2 py-0.5 rounded-full">${w.v} (${w.n}x)</span>`).join('')}</div></div>`});
+    // Sessions
+    let sessList='';an.recentSessions.reverse().forEach(s=>{const d=new Date(s.start);const acc=s.n?Math.round(s.ok/s.n*100):0;const dur=Math.round((s.end-s.start)/60000);
+      sessList+=`<div class="flex items-center justify-between py-1 border-b border-slate-700/30"><span class="text-slate-400 text-xs">${d.toLocaleDateString()} ${d.toLocaleTimeString().slice(0,5)}</span><div class="flex items-center gap-2"><span class="text-white text-xs">${s.n} слов</span><span class="${acc>=70?'text-green-400':'text-amber-400'} text-xs">${acc}%</span><span class="text-slate-500 text-xs">${dur}мин</span></div></div>`});
+    // Response time: fastest/slowest
+    let speedList='';an.fastest.forEach(w=>{const avg=Math.round(w.totalMs/w.n/1000*10)/10;speedList+=`<span class="bg-green-900/30 text-green-300 text-xs px-2 py-1 rounded-full">${w.w} ${avg}s</span> `});
+    let slowList='';an.slowest.forEach(w=>{const avg=Math.round(w.totalMs/w.n/1000*10)/10;slowList+=`<span class="bg-red-900/30 text-red-300 text-xs px-2 py-1 rounded-full">${w.w} ${avg}s</span> `});
+
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-4">📊 Аналитика</h2>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-3 gap-2 mb-4">
+      <div class="bg-slate-800 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-white">${an.todayA}</div><div class="text-slate-500 text-xs">Сегодня</div><div class="text-xs ${an.todayAcc>=70?'text-green-400':'text-amber-400'}">${an.todayAcc}%</div></div>
+      <div class="bg-slate-800 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-white">${an.weekA}</div><div class="text-slate-500 text-xs">За неделю</div><div class="text-xs ${an.weekAcc>=70?'text-green-400':'text-amber-400'}">${an.weekAcc}%</div></div>
+      <div class="bg-slate-800 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-white">${an.allA}</div><div class="text-slate-500 text-xs">Всего</div><div class="text-xs ${an.allAcc>=70?'text-green-400':'text-amber-400'}">${an.allAcc}%</div></div>
+    </div>
+
+    <!-- Response time -->
+    <div class="bg-slate-800 rounded-xl p-3 mb-4">
+      <div class="text-slate-400 text-xs mb-1">Среднее время ответа</div>
+      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-white">${(an.todayAvgMs/1000).toFixed(1)}s</span><span class="text-slate-500 text-xs">сегодня</span><span class="text-lg text-slate-400">${(an.avgMs/1000).toFixed(1)}s</span><span class="text-slate-500 text-xs">всего</span></div>
+    </div>
+
+    <!-- Daily chart -->
+    <div class="bg-slate-800 rounded-xl p-3 mb-4">
+      <div class="text-slate-400 text-xs mb-2">Слов в день (14 дней)</div>
+      <div class="flex items-end gap-1 h-24 overflow-hidden">${bars}</div>
+    </div>
+
+    <!-- Accuracy by level -->
+    <div class="bg-slate-800 rounded-xl p-3 mb-4">
+      <div class="text-slate-400 text-xs mb-2">Точность по уровням</div>
+      ${lvlBars||'<div class="text-slate-600 text-xs">Нет данных</div>'}
+    </div>
+
+    <!-- Speed -->
+    <div class="bg-slate-800 rounded-xl p-3 mb-4">
+      <div class="text-slate-400 text-xs mb-2">⚡ Быстрые слова</div>
+      <div class="flex flex-wrap gap-1">${speedList||'<span class="text-slate-600 text-xs">Нужно больше данных</span>'}</div>
+      <div class="text-slate-400 text-xs mb-2 mt-3">🐌 Медленные слова</div>
+      <div class="flex flex-wrap gap-1">${slowList||'<span class="text-slate-600 text-xs">Нужно больше данных</span>'}</div>
+    </div>
+
+    <!-- Hardest words -->
+    ${an.hardest.length?`<div class="bg-slate-800 rounded-xl p-3 mb-4">
+      <div class="text-slate-400 text-xs mb-2">🩸 Трудные слова</div>
+      <div class="max-h-40 overflow-y-auto">${hardList}</div>
+    </div>`:''}
+
+    <!-- Confusion pairs -->
+    ${an.confused.length?`<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-3 mb-4">
+      <div class="text-red-400 text-xs mb-2">🔀 Путаница — что отвечал вместо правильного</div>
+      <div class="max-h-48 overflow-y-auto">${confList}</div>
+      <button onclick="trainConfused()" class="w-full mt-3 py-2 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 font-semibold text-sm active:scale-95">🎯 Тренировать проблемные слова</button>
+    </div>`:''}
+
+    <!-- Recent sessions -->
+    ${an.recentSessions.length?`<div class="bg-slate-800 rounded-xl p-3 mb-4">
+      <div class="text-slate-400 text-xs mb-2">📋 Последние сессии</div>
+      <div class="max-h-36 overflow-y-auto">${sessList}</div>
+    </div>`:''}
+
+    <div class="text-slate-600 text-xs text-center">Всего событий: ${an.totalEvents}</div>
+    <button onclick="if(confirm('Очистить аналитику?')){save(LS_LOG,[]);save(LS_CONF,{});toast('Очищено');render()}" class="w-full mt-3 py-2 rounded-xl bg-slate-800 text-red-400 text-xs">🗑 Очистить данные аналитики</button>
+    </div></div>`;return}
+
+  // ADD
+  if(S.sc==='add'){
+    const lo=[1,2,3,4,5].map(l=>`<option value="${l}">${l} ${LN[l]}</option>`).join('');
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sc='levels';render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <h2 class="text-xl font-bold text-white mb-4">Добавить слова</h2>
+    <div class="flex gap-1 mb-4"><button onclick="showTab('s')" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold" id="tab-s">✏️ Одно</button><button onclick="showTab('b')" class="flex-1 py-2 rounded-lg bg-slate-800 text-slate-400 text-xs" id="tab-b">📋 Список</button><button onclick="showTab('p')" class="flex-1 py-2 rounded-lg bg-slate-800 text-slate-400 text-xs" id="tab-p">📝 Текст</button></div>
+    <div id="panel-s"><div class="space-y-3"><input id="aw-w" placeholder="Word"><input id="aw-t" placeholder="Перевод"><input id="aw-e" placeholder="Example (optional)"><input id="aw-h" placeholder="Hint (optional)"><select id="aw-l">${lo}</select><button onclick="addSingle()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold active:scale-95">Добавить</button></div></div>
+    <div id="panel-b" style="display:none"><div class="space-y-3"><div class="text-slate-400 text-xs">Формат: <code class="bg-slate-700 px-1 rounded">word - перевод</code></div><textarea id="imp-txt" rows="6" placeholder="apple - яблоко&#10;banana - банан"></textarea><select id="imp-l">${lo}</select><button onclick="importBulk()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold active:scale-95">Импорт</button></div></div>
+    <div id="panel-p" style="display:none"><div class="space-y-3"><div class="text-slate-400 text-xs">Вставь английский текст — слова будут переведены автоматически</div><textarea id="pt-txt" rows="5" placeholder="Paste English text here..."></textarea><select id="pt-l">${lo}</select><button id="pt-btn" onclick="parseText()" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold active:scale-95">🔍 Извлечь</button><div id="pt-res"></div></div></div>
+    <div class="mt-6 pt-4 border-t border-slate-700 flex gap-3"><button onclick="exportData()" class="flex-1 py-3 rounded-xl bg-slate-800 text-white font-semibold text-sm active:scale-95">📤 Экспорт</button><button onclick="importData()" class="flex-1 py-3 rounded-xl bg-slate-800 text-white font-semibold text-sm active:scale-95">📥 Импорт</button></div>
+    <div class="mt-4 pt-4 border-t border-slate-700">
+      <h3 class="text-white font-semibold text-sm mb-2">🤖 AI Тьютор (Claude API)</h3>
+      <div class="text-slate-400 text-xs mb-2">Получи ключ на <a href="https://console.anthropic.com" target="_blank" class="text-blue-400 underline">console.anthropic.com</a></div>
+      <input id="cfg-ai-key" type="password" placeholder="sk-ant-..." class="mb-2 text-sm" value="${getAIConfig().key}">
+      <input id="cfg-ai-model" placeholder="Model" class="mb-2 text-sm" value="${getAIConfig().model}">
+      <button onclick="const c=getAIConfig();c.key=document.getElementById('cfg-ai-key').value.trim();c.model=document.getElementById('cfg-ai-model').value.trim()||'claude-sonnet-4-20250514';saveAIConfig(c);toast('AI настройки сохранены!')" class="w-full py-2 rounded-xl bg-purple-600 text-white font-semibold text-sm active:scale-95">Сохранить AI настройки</button>
+    </div>
+    <div class="mt-4 pt-4 border-t border-slate-700">
+      <button onclick="save('vm2_onboarded',false);S.sc='onboard_intro';render()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-sm active:scale-95">🎯 Пройти тест уровня заново</button>
+    </div>
+    </div></div>`;return}
+
+  // MODE SELECT
+  if(S.sM!==null){const l=S.sM,s=gS(l),c=LC[l],dc=getDueCount(l),nt=getNewToday(l);
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <button onclick="S.sM=null;render()" class="text-slate-400 text-sm mb-4">← Назад</button>
+    <div class="text-center mb-6"><div class="w-16 h-16 rounded-full bg-gradient-to-br ${c.bg} mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white shadow-lg">${l}</div><h2 class="text-xl font-bold text-white">Уровень ${l} — ${LN[l]}</h2><p class="text-slate-400 text-sm mt-1">${s.t} слов</p></div>
+    <div class="grid grid-cols-3 gap-2 mb-4 text-center"><div class="bg-slate-800 rounded-xl p-2"><div class="text-green-400 font-bold">${s.m}</div><div class="text-slate-500 text-xs">Освоено</div></div><div class="bg-slate-800 rounded-xl p-2"><div class="text-amber-400 font-bold">${dc.due}</div><div class="text-slate-500 text-xs">К повторению</div></div><div class="bg-slate-800 rounded-xl p-2"><div class="text-blue-400 font-bold">${s.nw}</div><div class="text-slate-500 text-xs">Новых</div></div></div>
+    <div class="space-y-3">
+    ${dc.due>0?`<button onclick="go(${l},'due')" class="w-full bg-amber-900/30 hover:bg-amber-900/50 border border-amber-500/30 rounded-xl p-4 text-left"><div class="text-amber-400 font-semibold">🔄 Повторение (${dc.due})</div><div class="text-slate-400 text-xs">Слова которые пора повторить</div></button>`:''}
+    <button onclick="go(${l})" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left"><div class="text-white font-semibold">📚 Смешанная сессия</div><div class="text-slate-400 text-xs">Повторение + до ${NEW_PER_DAY} новых/день</div></button>
+    ${s.nw>0?`<button onclick="go(${l},'new')" class="w-full bg-slate-800 hover:bg-slate-700 rounded-xl p-4 text-left"><div class="text-blue-400 font-semibold">🆕 Только новые (${Math.min(s.nw,Math.max(0,NEW_PER_DAY-nt.introduced))})</div><div class="text-slate-400 text-xs">Сегодня изучено: ${nt.introduced}/${NEW_PER_DAY}</div></button>`:''}
+    <button onclick="startAudioMode(${l},'due')" class="w-full bg-indigo-900/30 hover:bg-indigo-900/50 border border-indigo-500/20 rounded-xl p-4 text-left"><div class="text-indigo-400 font-semibold">🎧 Аудио-режим</div><div class="text-slate-400 text-xs">Слушай слова на ходу</div></button>
+    </div></div></div>`;return}
+
   // LEVELS
-  if(state.sc==='levels'){
-    const tW=Object.values(DB).reduce((s,l)=>s+l.length,0);
-    const tM=Object.entries(DB).reduce((s,[l,w])=>s+w.filter((_,i)=>gW(+l,i).c>=MC).length,0);
-    let lvls='';
-    for(let l=1;l<=5;l++){
-      const u=uL.includes(l),pr=gP(l),s=gS(l),c=LC[l];
-      lvls+=`<button onclick="${u?`state.sM=${l};render()`:''}" ${u?'':'disabled'} class="w-full rounded-xl p-4 text-left transition-all ${u?'bg-slate-800 hover:bg-slate-700':'bg-slate-900 opacity-50 cursor-not-allowed'}" ${u?'':'style="filter:grayscale(100%)"'}>
+  if(S.sc==='levels'){
+    const tW=Object.values(db).reduce((s,l)=>s+l.length,0);const tM=Object.entries(db).reduce((s,[l,w])=>s+w.filter((_,i)=>{const c=getCard(+l,i);return c.st===2&&c.reps>=3}).length,0);
+    let lvls='';for(let l=1;l<=5;l++){const u=uL.includes(l),pr=gP(l),s=gS(l),c=LC[l],dc=getDueCount(l);
+      lvls+=`<button onclick="${u?`S.sM=${l};render()`:''}" ${u?'':'disabled'} class="w-full rounded-xl p-4 text-left transition-all ${u?'bg-slate-800 hover:bg-slate-700':'bg-slate-900 opacity-50 cursor-not-allowed'}" ${u?'':'style="filter:grayscale(100%)"'}>
       <div class="flex items-center gap-3"><div class="w-12 h-12 rounded-full bg-gradient-to-br ${c.bg} flex items-center justify-center font-bold text-white text-lg shadow-lg shrink-0">${u?l:'🔒'}</div>
       <div class="flex-1"><div class="flex items-center justify-between"><div><span class="text-white font-semibold">Ур.${l}</span> <span class="text-slate-400 text-sm">${LN[l]}</span></div><span class="text-slate-400 text-sm">${s.m}/${s.t}</span></div>
       <div class="mt-2 h-2 bg-slate-700 rounded-full overflow-hidden"><div class="h-full ${c.b} rounded-full" style="width:${pr*100}%"></div></div>
-      ${!u&&l>1?`<div class="text-xs text-slate-500 mt-1">Освой 70% ур.${l-1}</div>`:''}
-      ${pr>=1?'<div class="text-xs text-green-400 mt-1">✅ Освоен!</div>':''}
-      ${u&&pr<1?`<div class="text-xs text-slate-500 mt-1">🔄${s.p} 🆕${s.n}</div>`:''}</div></div></button>`;
-    }
-    a.innerHTML=`<div style="min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)" class="p-4"><div class="max-w-md mx-auto">
-    <div class="text-center mb-5 relative"><h1 class="text-3xl font-bold text-white mb-1">📚 VocabMaster</h1><p class="text-slate-400 text-sm">${tW} слов — 5 уровней</p>
-    <button onclick="toggleSound()" class="absolute top-0 right-0 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Звук">${soundOn?'🔊':'🔇'}</button></div>
-    <div class="bg-slate-800 rounded-xl p-4 mb-5"><div class="grid grid-cols-4 gap-2 text-center">
-    <div><div class="text-xl font-bold text-white">${tM}</div><div class="text-xs text-slate-400">Освоено</div></div>
-    <div><div class="text-xl font-bold text-white">${tW-tM}</div><div class="text-xs text-slate-400">Осталось</div></div>
-    <div><div class="text-xl font-bold text-amber-400">🔥${state.st.s}</div><div class="text-xs text-slate-400">Серия</div></div>
-    <div><div class="text-xl font-bold text-white">${state.st.b}</div><div class="text-xs text-slate-400">Рекорд</div></div></div>
-    <div class="mt-3 h-2 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 rounded-full" style="width:${(tM/tW)*100}%"></div></div>
-    <div class="text-right text-xs text-slate-500 mt-1">${Math.round((tM/tW)*100)}%</div></div>
+      <div class="flex gap-3 mt-1 text-xs">${dc.due>0?`<span class="text-amber-400">🔄${dc.due}</span>`:''}${s.nw>0&&u?`<span class="text-blue-400">🆕${s.nw}</span>`:''}${!u&&l>1?`<span class="text-slate-500">Освой 70% ур.${l-1}</span>`:''}${pr>=1?`<span class="text-green-400">✅</span>`:''}</div>
+      </div></div></button>`}
+
+    // Heatmap (last 28 days)
+    const days=streak.days||{};let hm='';for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const v=days[ds]||0;
+      const bg=v===0?'bg-slate-800':v<5?'bg-green-900':v<15?'bg-green-700':v<30?'bg-green-500':'bg-green-400';
+      hm+=`<div class="w-3 h-3 rounded-sm ${bg}" title="${ds}: ${v}"></div>`}
+
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <div class="text-center mb-4 relative"><h1 class="text-3xl font-bold text-white mb-1">📚 VocabMaster</h1><p class="text-slate-400 text-sm">${tW} слов — FSRS</p>
+    <div class="absolute top-0 right-0 flex gap-2"><button onclick="toggleSound()" class="text-xl opacity-70 hover:opacity-100">${soundOn?'🔊':'🔇'}</button><button onclick="tutorWord=null;tutorChat=[];S.sc='tutor';render()" class="text-xl opacity-70 hover:opacity-100">🤖</button><button onclick="S.sc='read';render()" class="text-xl opacity-70 hover:opacity-100">📖</button><button onclick="S.sc='analytics';render()" class="text-xl opacity-70 hover:opacity-100">📊</button><button onclick="S.sc='add';render()" class="text-xl opacity-70 hover:opacity-100">⚙️</button></div></div>
+
+    ${totalDue>0?`<button onclick="goDaily()" class="w-full mb-3 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-lg shadow-lg active:scale-95 hover:shadow-xl transition-all">📅 Повтори сегодня (${totalDue})</button>`:`<div class="w-full mb-3 py-3 rounded-xl bg-slate-800 text-center text-green-400 font-semibold">✅ Все повторения сделаны!</div>`}
+
+    ${(()=>{const wod=getWordOfDay();if(!wod)return'';const rel=getRelated(wod.w);
+    return`<div class="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border border-indigo-500/20 rounded-xl p-3 mb-3">
+      <div class="flex items-center justify-between mb-1"><span class="text-indigo-400 text-xs font-semibold">⭐ Слово дня</span><span class="text-slate-500 text-xs">${LN[wod.lv]}</span></div>
+      <div class="flex items-center gap-2"><span class="text-white font-bold text-lg">${wod.w}</span><button onclick="doSpeak('${wod.w}')" class="text-blue-400">🔊</button><span class="text-cyan-300 text-sm">— ${wod.tr}</span></div>
+      <div class="text-slate-400 text-xs italic mt-1">${wod.ex}</div>
+      ${rel.synonyms.length?`<div class="text-xs mt-1"><span class="text-green-400">= </span><span class="text-slate-500">${rel.synonyms.slice(0,3).join(', ')}</span></div>`:''}
+    </div>`})()}
+
+    <div class="bg-slate-800 rounded-xl p-4 mb-4">
+    <div class="grid grid-cols-4 gap-2 text-center"><div><div class="text-xl font-bold text-white">${tM}</div><div class="text-xs text-slate-400">Освоено</div></div><div><div class="text-xl font-bold text-white">${tW-tM}</div><div class="text-xs text-slate-400">Осталось</div></div><div><div class="text-xl font-bold text-amber-400">🔥${streak.current||0}</div><div class="text-xs text-slate-400">Дней</div></div><div><div class="text-xl font-bold text-white">${streak.best||0}</div><div class="text-xs text-slate-400">Рекорд</div></div></div>
+    <div class="mt-3 h-2 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 rounded-full" style="width:${tW?((tM/tW)*100):0}%"></div></div>
+    <div class="flex justify-between text-xs text-slate-500 mt-2"><span>${Math.round(tW?((tM/tW)*100):0)}%</span><span>${(days[today()]||0)} слов сегодня</span></div>
+    <div class="flex flex-wrap gap-1 mt-3 justify-center">${hm}</div></div>
+
     <div class="space-y-3">${lvls}</div>
-    <div class="text-center mt-5 text-slate-500 text-xs">70% слов для следующего уровня</div></div></div>`;return;
-  }
+    <button onclick="S.sc='add';render()" class="w-full mt-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold text-sm">➕ Добавить слова | 📤📥 Бэкап</button>
+    <div class="grid grid-cols-2 gap-2 mt-2">
+      <button onclick="S.sc='read';render()" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold text-sm">📖 Чтение</button>
+      <button onclick="S.sc='topics';render()" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold text-sm">🏷 Темы</button>
+      <button onclick="S.sc='games';render()" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold text-sm">🎮 Мини-игры</button>
+      <button onclick="S.sc='badges';render()" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold text-sm">🏆 ${getUnlockedBadges().length}/${BADGES.length}</button>
+    </div>
+    <button onclick="startAudioAll()" class="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-indigo-900/60 to-purple-900/60 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-300 font-semibold text-sm">🎧 Аудио-режим (учи на ходу)</button>
+    </div></div>`;return}
 
   // STUDY
-  if(state.sc==='study'){
-    const cW=state.sQ[state.cI];if(!cW)return;
-    const pr=gW(cW.lv,cW.i),c=LC[state.cL],pct=((state.cI+1)/state.sQ.length)*100;
-    const dots=Array.from({length:MC}).map((_,i)=>`<div class="w-2.5 h-2.5 rounded-full ${i<pr.c?'bg-green-400':'bg-slate-600'}"></div>`).join('');
-    a.innerHTML=`<div id="study-wrap" style="min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)" class="p-4"><div class="max-w-md mx-auto">
-    <div class="flex items-center justify-between mb-4"><button onclick="state.sc='levels';render()" class="text-slate-400 text-sm">←</button><div class="text-sm font-semibold ${c.t}">Ур.${state.cL}</div><div class="flex items-center gap-3"><button onclick="toggleSound()" class="text-lg opacity-70 hover:opacity-100">${soundOn?'🔊':'🔇'}</button><span class="text-slate-400 text-sm">${state.cI+1}/${state.sQ.length}</span></div></div>
-    <div class="h-1.5 bg-slate-700 rounded-full mb-5 overflow-hidden"><div class="h-full ${c.b} rounded-full" style="width:${pct}%"></div></div>
-    ${state.st.s>=3?`<div class="text-center mb-3"><span class="text-amber-400 text-sm">🔥${state.st.s}</span></div>`:''}
-    <div id="card" class="rounded-2xl p-6 text-center bg-slate-800">
-    <div class="flex justify-center gap-1 mb-3">${dots}${pr.c>=MC?'<span class="text-green-400 text-xs ml-1">⭐</span>':''}</div>
-    <div class="text-4xl font-bold text-white mb-1">${cW.w}</div>
-    <button onclick="doSpeak('${cW.w}')" class="text-blue-400 hover:text-blue-300 text-2xl mb-1 active:scale-90 transition-transform" title="Listen">🔊</button>
-    <div class="text-slate-400 text-sm italic mb-4">${cW.ex} <button onclick="doSpeak('${cW.ex.replace(/'/g,"\\'")}')" class="text-blue-400 hover:text-blue-300 text-xs ml-1">🔈</button></div>
-    ${!state.sA&&!state.sH?`<button onclick="state.sH=true;render()" class="text-amber-400 text-xs mb-4 hover:underline block mx-auto">💡 Подсказка</button>`:''}
-    ${state.sH&&!state.sA?`<div class="bg-amber-900/30 rounded-lg px-3 py-2 mb-4"><span class="text-amber-300 text-sm">💡 ${cW.h}</span></div>`:''}
-    ${!state.sA?`<button onclick="state.sA=true;render()" class="w-full py-3 rounded-xl bg-gradient-to-r ${c.bg} text-white font-semibold text-lg shadow-lg active:scale-95">Показать</button>`:
-    `<div class="text-3xl font-bold text-cyan-300 mb-5 mt-2">${cW.tr}</div>
-    <div class="text-slate-500 text-xs mb-4">← не знаю | знаю →</div>
-    <div class="flex gap-3"><button onclick="ans(false)" class="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 font-semibold active:scale-95">❌ Не знал</button><button onclick="ans(true)" class="flex-1 py-3 rounded-xl bg-green-500/20 border border-green-500/50 text-green-400 font-semibold active:scale-95">✅ Знал</button></div>`}
-    </div></div></div>`;
-    const wrap=document.getElementById('study-wrap');
-    wrap.ontouchstart=e=>{touchX=e.touches[0].clientX};
-    wrap.ontouchend=e=>{if(!state.sA)return;const d=e.changedTouches[0].clientX-touchX;if(Math.abs(d)>80)ans(d>0)};
-    // Auto-pronounce word on new card
-    speak(cW.w);
-    return;
-  }
+  if(S.sc==='study'){const cW=S.sQ[S.cI];if(!cW){S.sc='results';render();return}
+    const c=getCard(cW.lv,cW.i);const cl=LC[cW.lv]||LC[1];const pct=((S.cI+1)/S.sQ.length)*100;
+    const leech=c.leech?`<div class="text-xs text-red-400 mb-2">🩸 Трудное слово — <button onclick="openTutor('${cW.w}','${cW.tr.replace(/'/g,"\\'")}','${safeEx}',${cW.lv})" class="text-purple-400 underline">спроси AI 🤖</button></div>`:'';
+    const safeEx=cW.ex.replace(/'/g,"\\'");let ci='';
+
+    if(cW.mode===0){ci=`${leech}<div class="text-4xl font-bold text-white mb-1">${cW.w}</div><div class="flex justify-center gap-3 mb-1"><button onclick="doSpeak('${cW.w}')" class="text-blue-400 text-2xl active:scale-90">🔊</button><button onclick="openTutor('${cW.w}','${cW.tr.replace(/'/g,"\\'")}','${safeEx}',${cW.lv})" class="text-purple-400 text-2xl active:scale-90">🤖</button></div><div class="text-slate-400 text-sm italic mb-4">${cW.ex} <button onclick="doSpeak('${safeEx}')" class="text-blue-400 text-xs">🔈</button></div>
+    ${!S.sA&&!S.sH?'<button onclick="S.sH=true;render()" class="text-amber-400 text-xs mb-4 hover:underline block mx-auto">💡</button>':''}${S.sH&&!S.sA?`<div class="bg-amber-900/30 rounded-lg px-3 py-2 mb-4"><span class="text-amber-300 text-sm">💡 ${cW.h}</span></div>`:''}
+    ${!S.sA?`<button onclick="S.sA=true;render()" class="w-full py-3 rounded-xl bg-gradient-to-r ${cl.bg} text-white font-semibold text-lg shadow-lg active:scale-95">Показать</button>`:
+          `<div class="text-3xl font-bold text-cyan-300 mb-4 mt-2">${cW.tr}</div>${renderRelated(cW.w)}<div class="flex gap-2"><button onclick="ans(1)" class="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 font-semibold active:scale-95">Снова</button><button onclick="ans(3)" class="flex-1 py-3 rounded-xl bg-green-500/20 border border-green-500/50 text-green-400 font-semibold active:scale-95">Знаю</button><button onclick="ans(4)" class="flex-1 py-3 rounded-xl bg-blue-500/20 border border-blue-500/50 text-blue-400 font-semibold active:scale-95">Легко</button></div>`}`}
+    else if(cW.mode===1){ci=`${leech}<div class="text-sm text-amber-400 mb-2">🔄 Как по-английски?</div><div class="text-4xl font-bold text-cyan-300 mb-2">${cW.tr}</div><button onclick="openTutor('${cW.w}','${cW.tr.replace(/'/g,"\\'")}','${safeEx}',${cW.lv})" class="text-purple-400 text-lg active:scale-90 mb-2 block mx-auto">🤖 помощь</button>
+    ${!S.sA?`<button onclick="S.sA=true;render()" class="w-full py-3 rounded-xl bg-gradient-to-r ${cl.bg} text-white font-semibold text-lg shadow-lg active:scale-95">Показать</button>`:
+    `<div class="text-3xl font-bold text-white mb-2">${cW.w}</div><button onclick="doSpeak('${cW.w}')" class="text-blue-400 text-2xl mb-3 active:scale-90">🔊</button>${renderRelated(cW.w)}<div class="flex gap-2"><button onclick="ans(1)" class="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 font-semibold active:scale-95">Снова</button><button onclick="ans(3)" class="flex-1 py-3 rounded-xl bg-green-500/20 border border-green-500/50 text-green-400 font-semibold active:scale-95">Знаю</button><button onclick="ans(4)" class="flex-1 py-3 rounded-xl bg-blue-500/20 border border-blue-500/50 text-blue-400 font-semibold active:scale-95">Легко</button></div>`}`}
+    else if(cW.mode===2){if(!S.cOpts.length)S.cOpts=getRandChoices(cW);
+      ci=`${leech}<div class="text-sm text-purple-400 mb-2">🎯 Выбери перевод</div><div class="text-4xl font-bold text-white mb-1">${cW.w}</div><button onclick="doSpeak('${cW.w}')" class="text-blue-400 text-2xl mb-3 active:scale-90">🔊</button>
+      <div class="space-y-2">${S.cOpts.map(o=>{let cls='bg-slate-700 hover:bg-slate-600 text-white';if(S.cAns!==null){if(o===cW.tr)cls='bg-green-600 text-white';else if(o===S.cAns)cls='bg-red-600 text-white';else cls='bg-slate-700 text-slate-500'}
+      return`<button onclick="${S.cAns===null?`checkChoice('${o.replace(/'/g,"\\'")}')`:''}" class="w-full py-3 rounded-xl ${cls} font-medium text-left px-4">${o}</button>`}).join('')}</div>`}
+    else{const ok=S.sA&&S.typed.toLowerCase().trim()===cW.w.toLowerCase().trim();
+      ci=`${leech}<div class="text-sm text-green-400 mb-2">⌨️ Напиши слово</div><div class="text-3xl font-bold text-cyan-300 mb-2">${cW.tr}</div><div class="text-slate-400 text-sm mb-4">${cW.h}</div>
+      ${!S.sA?`<input id="ti" type="text" placeholder="English word..." class="text-center text-lg mb-3" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')checkTyped()"><button onclick="checkTyped()" class="w-full py-3 rounded-xl bg-gradient-to-r ${cl.bg} text-white font-semibold active:scale-95">Проверить</button>`:
+      `<div class="p-3 rounded-xl mb-3 ${ok?'bg-green-900/40 border border-green-500/50':'bg-red-900/40 border border-red-500/50'}"><div class="text-sm ${ok?'text-green-400':'text-red-400'}">${ok?'Верно!':'Неверно'}</div>${!ok?`<div class="text-slate-400 text-xs mt-1">Ответ: <span class="text-red-300">${S.typed}</span></div>`:''}<div class="text-white font-bold text-xl mt-1">${cW.w}</div><button onclick="doSpeak('${cW.w}')" class="text-blue-400 text-xl mt-1 active:scale-90">🔊</button></div>${renderRelated(cW.w)}`}`}
+
+    // MODE 4: Active Recall — write a sentence
+    if(cW.mode===4){
+      const sr=S.sentenceResult;
+      ci=`${leech}<div class="text-sm text-orange-400 mb-2">✍️ Составь предложение</div>
+      <div class="text-2xl font-bold text-white mb-1">${cW.w} <button onclick="doSpeak('${cW.w}')" class="text-blue-400 text-lg">🔊</button></div>
+      <div class="text-cyan-300 mb-3">${cW.tr}</div>
+      ${!S.sA?`<textarea id="si" rows="2" placeholder="Write a sentence using '${cW.w}'..." class="text-sm mb-3" autocapitalize="sentences"></textarea>
+      <button id="s-check-btn" onclick="checkSentence()" class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold active:scale-95">Проверить</button>`:
+      `<div class="p-3 rounded-xl mb-3 ${sr&&sr.ok?'bg-green-900/40 border border-green-500/50':'bg-red-900/40 border border-red-500/50'}">
+        <div class="text-white text-sm italic mb-2">"${S.typed}"</div>
+        ${sr?`<div class="text-sm ${sr.ok?'text-green-400':'text-red-400'} mb-1">${sr.ok?'Отлично!':'Нужно доработать'} ${sr.score?'⭐'.repeat(sr.score):''}</div>
+        ${sr.grammar&&sr.grammar!=='ok'?`<div class="text-xs text-amber-300 mb-1">📝 ${sr.grammar}</div>`:''}
+        ${sr.usage&&sr.usage!=='ok'?`<div class="text-xs text-blue-300 mb-1">💡 ${sr.usage}</div>`:''}
+        ${sr.better?`<div class="text-xs text-green-300 mt-1">✨ ${sr.better}</div>`:''}`
+        :`<div class="text-slate-400 text-sm">${sr?.feedback||''}</div>`}
+      </div>${renderRelated(cW.w)}`}`;
+    }
+
+    a.innerHTML=`<div id="sw" style="${BG}" class="p-4"><div class="max-w-md mx-auto">
+    <div class="flex items-center justify-between mb-4"><button onclick="S.sc='levels';render()" class="text-slate-400 text-sm">←</button><div class="text-sm font-semibold ${cl.t}">${S.cL?'Ур.'+S.cL:'Повторение'}</div><div class="flex items-center gap-3"><button onclick="toggleSound()" class="text-lg opacity-70 hover:opacity-100">${soundOn?'🔊':'🔇'}</button><span class="text-slate-400 text-sm">${S.cI+1}/${S.sQ.length}</span></div></div>
+    <div class="h-1.5 bg-slate-700 rounded-full mb-5 overflow-hidden"><div class="h-full ${cl.b} rounded-full" style="width:${pct}%"></div></div>
+    <div id="card" class="rounded-2xl p-6 text-center bg-slate-800">${ci}</div></div></div>`;
+    if(cW.mode<=1){const w=document.getElementById('sw');w.ontouchstart=e=>{touchX=e.touches[0].clientX};w.ontouchend=e=>{if(!S.sA)return;const d=e.changedTouches[0].clientX-touchX;if(d>80)ans(3);else if(d<-80)ans(1)}}
+    if(cW.mode===3&&!S.sA)setTimeout(()=>{const i=document.getElementById('ti');if(i)i.focus()},100);
+    if(cW.mode===4&&!S.sA)setTimeout(()=>{const i=document.getElementById('si');if(i)i.focus()},100);
+    if((cW.mode===0||cW.mode===2)&&!S.sA)speak(cW.w);
+    cardShownAt=Date.now();
+    return}
 
   // RESULTS
-  if(state.sc==='results'){
-    const ok=state.sR.filter(r=>r.ok).length,tot=state.sR.length,pct=tot?Math.round((ok/tot)*100):0;
-    const c=LC[state.cL],lp=gP(state.cL),s=gS(state.cL),nu=state.cL<5&&lp>=MT;
-    const items=state.sR.map(r=>`<div class="flex items-center justify-between py-1 border-b border-slate-700/50 last:border-0"><span class="text-white text-sm">${r.w}</span><div class="flex items-center gap-2"><span class="text-slate-400 text-xs">${r.tr}</span><span>${r.ok?'✅':'❌'}</span></div></div>`).join('');
-    a.innerHTML=`<div style="min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)" class="p-4"><div class="max-w-md mx-auto text-center">
+  if(S.sc==='results'){checkNewBadges();const ok=S.sR.filter(r=>r.ok).length,tot=S.sR.length,pct=tot?Math.round((ok/tot)*100):0;const cl=LC[S.cL]||LC[1];const lp=S.cL?gP(S.cL):0;const s=S.cL?gS(S.cL):null;
+    const failed=S.sR.filter(r=>!r.ok);
+    const items=S.sR.map(r=>`<div class="flex items-center justify-between py-1 border-b border-slate-700/50 last:border-0"><span class="text-white text-sm">${r.w}</span><div class="flex items-center gap-2">${!r.ok?`<button onclick="openTutor('${r.w}','${r.tr.replace(/'/g,"\\'")}','${(r.ex||'').replace(/'/g,"\\'")}',${r.lv})" class="text-purple-400 text-xs">🤖</button>`:''}<span class="text-slate-400 text-xs">${r.tr}</span><span>${r.ok?'✅':'❌'}</span></div></div>`).join('');
+    // Session confused words
+    const conf=load(LS_CONF,{});
+    let confHtml='';failed.forEach(f=>{const cd=conf[f.w.toLowerCase()];if(cd&&cd.wrong.length){confHtml+=`<div class="flex items-center justify-between py-1"><span class="text-white text-sm">${f.w}</span><div class="flex gap-1">${cd.wrong.slice(0,2).map(w=>`<span class="bg-red-900/30 text-red-300 text-xs px-2 py-0.5 rounded-full">${w.v}</span>`).join('')}</div></div>`}});
+    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
     <div class="text-5xl mb-4">${pct>=80?'🎉':pct>=50?'👍':'💪'}</div><h2 class="text-2xl font-bold text-white mb-1">Готово!</h2>
     <div class="bg-slate-800 rounded-2xl p-6 mt-5"><div class="text-5xl font-bold text-white mb-1">${pct}%</div><div class="text-slate-400 text-sm">${ok}/${tot}</div>
-    <div class="grid grid-cols-2 gap-4 mt-5"><div class="bg-slate-700/50 rounded-xl p-3"><div class="text-green-400 text-xl font-bold">${ok}</div><div class="text-slate-400 text-xs">✅</div></div><div class="bg-slate-700/50 rounded-xl p-3"><div class="text-red-400 text-xl font-bold">${tot-ok}</div><div class="text-slate-400 text-xs">❌</div></div></div>
-    <div class="mt-5"><div class="flex justify-between text-sm text-slate-400 mb-1"><span>Ур.${state.cL}</span><span>${s.m}/${s.t} (${Math.round(lp*100)}%)</span></div><div class="h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full ${c.b} rounded-full" style="width:${lp*100}%"></div></div></div>
-    ${nu?`<div class="mt-4 bg-amber-900/30 rounded-xl p-3 bounce"><div class="text-amber-300 font-semibold">🔓 Уровень ${state.cL+1}!</div></div>`:''}</div>
+    <div class="grid grid-cols-2 gap-4 mt-4"><div class="bg-slate-700/50 rounded-xl p-3"><div class="text-green-400 text-xl font-bold">${ok}</div><div class="text-slate-400 text-xs">Верно</div></div><div class="bg-slate-700/50 rounded-xl p-3"><div class="text-red-400 text-xl font-bold">${tot-ok}</div><div class="text-slate-400 text-xs">Ошибки</div></div></div>
+    ${s?`<div class="mt-4"><div class="flex justify-between text-sm text-slate-400 mb-1"><span>Ур.${S.cL}</span><span>${s.m}/${s.t}</span></div><div class="h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full ${cl.b} rounded-full" style="width:${lp*100}%"></div></div></div>`:''}</div>
+    ${confHtml?`<div class="mt-4 bg-red-900/20 border border-red-500/20 rounded-xl p-3 text-left"><div class="text-red-400 text-xs mb-2">🔀 Путаница в этой сессии</div>${confHtml}</div>`:''}
     <div class="mt-4 bg-slate-800 rounded-xl p-4 max-h-48 overflow-y-auto text-left">${items}</div>
-    <div class="flex gap-3 mt-5"><button onclick="go(${state.cL})" class="flex-1 py-3 rounded-xl bg-gradient-to-r ${c.bg} text-white font-semibold shadow-lg active:scale-95">🔄</button><button onclick="state.sc='levels';render()" class="flex-1 py-3 rounded-xl bg-slate-700 text-white font-semibold active:scale-95">📊</button></div>
-    </div></div>`;
+    <div class="flex gap-3 mt-5">${S.cL?`<button onclick="go(${S.cL})" class="flex-1 py-3 rounded-xl bg-gradient-to-r ${cl.bg} text-white font-semibold shadow-lg active:scale-95">🔄</button>`:''}<button onclick="S.sc='analytics';render()" class="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-semibold active:scale-95">📊</button><button onclick="S.sc='levels';render()" class="flex-1 py-3 rounded-xl bg-slate-700 text-white font-semibold active:scale-95">🏠</button></div>
+    </div></div>`}
+}
+
+// === AI TUTOR ===
+const LS_AI='vm2_ai';
+function getAIConfig(){return load(LS_AI,{key:'',endpoint:'https://api.anthropic.com/v1/messages',model:'claude-sonnet-4-20250514'})}
+function saveAIConfig(c){save(LS_AI,c)}
+
+async function askAI(prompt,context){
+  const cfg=getAIConfig();
+  if(!cfg.key){toast('Добавь API ключ в настройках ⚙️','#ef4444');return null}
+  const sysPrompt='You are a friendly English language tutor helping a Russian speaker learn English vocabulary. Be concise. Use both English and Russian in explanations. Format with markdown-like structure but keep it short (under 200 words). Focus on practical usage.';
+  try{
+    const r=await fetch(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':cfg.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:cfg.model,max_tokens:500,system:sysPrompt,messages:[{role:'user',content:(context?context+'\n\n':'')+prompt}]})});
+    if(!r.ok){const e=await r.text();throw new Error(e)}
+    const d=await r.json();return d.content[0].text;
+  }catch(e){console.error(e);toast('AI ошибка: проверь ключ','#ef4444');return null}
+}
+
+// Pre-built prompts for word context
+function tutorPrompts(word,tr){return{
+  explain:`Explain the English word "${word}" (${tr}) to a Russian speaker. Include: 1) Clear definition 2) Common collocations 3) Register (formal/informal) 4) One memorable example sentence.`,
+  mnemonic:`Create a memorable mnemonic or association to help a Russian speaker remember that "${word}" means "${tr}". Use sound similarities between English and Russian, visual associations, or a funny mini-story. Be creative!`,
+  examples:`Give 5 diverse example sentences using "${word}" in different contexts (business, daily life, academic, casual, literature). Mark difficulty: [easy] [medium] [hard]. Add Russian translation for each.`,
+  difference:`What are common words that are easily confused with "${word}"? Explain the differences clearly with examples. If "${word}" has synonyms, explain the nuance between them. Use Russian translations.`,
+  usage:`When and how to use "${word}" in real conversations? Give: 1) Situations where this word fits perfectly 2) Common mistakes Russian speakers make with this word 3) A mini-dialogue example using it naturally.`,
+}}
+
+let tutorChat=[];let tutorWord=null;
+
+function openTutor(word,tr,ex,lv){
+  tutorWord={w:word,tr:tr,ex:ex,lv:lv};tutorChat=[];S.sc='tutor';render();
+}
+
+function tutorAsk(type){
+  if(!tutorWord)return;
+  const prompts=tutorPrompts(tutorWord.w,tutorWord.tr);
+  const prompt=prompts[type]||type;
+  runTutorQuery(prompt);
+}
+
+function tutorCustom(){
+  const inp=document.getElementById('tutor-input');if(!inp)return;
+  const q=inp.value.trim();if(!q)return;
+  inp.value='';
+  const context=tutorWord?`Context: the word is "${tutorWord.w}" (${tutorWord.tr}), level ${tutorWord.lv}.`:'';
+  runTutorQuery(q,context);
+}
+
+async function runTutorQuery(prompt,extraContext){
+  const context=tutorWord?`Word: "${tutorWord.w}" = "${tutorWord.tr}". Example: "${tutorWord.ex}".`:'';
+  tutorChat.push({role:'user',text:prompt.length>80?prompt.slice(0,80)+'...':prompt});
+  render();
+  // Show loading
+  tutorChat.push({role:'ai',text:'⏳ Думаю...',loading:true});
+  render();
+  const confData=load(LS_CONF,{});const confInfo=confData[tutorWord?.w?.toLowerCase()];
+  let confContext='';if(confInfo&&confInfo.wrong.length){confContext=`\nNote: the student often confuses this word with: ${confInfo.wrong.map(w=>w.v).join(', ')}.`}
+  const fullContext=(extraContext||context)+confContext;
+  const result=await askAI(prompt,fullContext);
+  // Remove loading
+  tutorChat=tutorChat.filter(m=>!m.loading);
+  if(result){tutorChat.push({role:'ai',text:result})}
+  else{tutorChat.push({role:'ai',text:'Не удалось получить ответ. Проверь API ключ в настройках.'})}
+  logEvent('tutor',{w:tutorWord?.w,prompt:prompt.slice(0,50)});
+  render();
+}
+
+function formatAIText(text){
+  return text
+    .replace(/\*\*(.+?)\*\*/g,'<strong class="text-white">$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code class="bg-slate-700 px-1 rounded text-cyan-300">$1</code>')
+    .replace(/^(\d+[\.\)]) /gm,'<span class="text-indigo-400">$1</span> ')
+    .replace(/^- /gm,'<span class="text-indigo-400">•</span> ')
+    .replace(/\[easy\]/gi,'<span class="bg-green-900/40 text-green-300 text-xs px-1 rounded">easy</span>')
+    .replace(/\[medium\]/gi,'<span class="bg-yellow-900/40 text-yellow-300 text-xs px-1 rounded">medium</span>')
+    .replace(/\[hard\]/gi,'<span class="bg-red-900/40 text-red-300 text-xs px-1 rounded">hard</span>')
+    .replace(/\n/g,'<br>');
+}
+
+// === KNOWLEDGE GRAPH ===
+// Word relationships: roots, families, synonyms, antonyms
+const ROOTS={
+'port':['transport','export','import','report','support','deport','portable'],
+'duct':['conduct','produce','reduce','introduce','deduce','educate'],
+'ject':['reject','inject','project','subject','object','eject'],
+'scrib':['describe','prescribe','subscribe','inscribe','manuscript'],
+'spect':['inspect','respect','suspect','expect','perspective','spectacle'],
+'mit':['commit','submit','permit','admit','transmit','emit'],
+'vert':['convert','divert','revert','introvert','extrovert','invert'],
+'dict':['predict','contradict','verdict','dictate','indicate'],
+'cred':['credit','incredible','credentials','credible','creed'],
+'gen':['generate','generous','genuine','general','genre','genius'],
+'struct':['structure','construct','destroy','instruct','obstruct'],
+'tract':['attract','extract','contract','distract','subtract'],
+'cept':['accept','concept','except','perceive','reception','intercept'],
+'form':['transform','inform','perform','reform','conform','formal'],
+'press':['express','impress','compress','depress','suppress'],
+'solve':['resolve','dissolve','absolve','solve','solution'],
+'pend':['depend','suspend','pending','independent','expenditure'],
+'mand':['command','demand','mandate','recommend','reprimand'],
+'fic':['sufficient','efficient','significant','magnificent','beneficial'],
+'vis':['visible','supervise','revision','vision','invisible','visual'],
+};
+
+const PREFIXES={
+'un-':['unable','unclear','unfair','unlikely','uncertain','undermine','unprecedented'],
+'re-':['replace','reduce','recover','reinforce','reconcile','relinquish','repudiate'],
+'dis-':['discover','display','disparity','disappear','disorder','dismiss','distinguish'],
+'pre-':['prevent','prepare','predict','predominant','preliminary','preclude','prevalent'],
+'mis-':['misconception','mistake','misunderstand','mislead','mismatch'],
+'over-':['overcome','overseas','overlook','overwhelm','overestimate'],
+'in/im-':['improve','impossible','imminent','impeccable','impartial','inevitable'],
+'ex-':['explain','expand','expedite','exaggerate','exacerbate','extract','explicit'],
+'co/con-':['contribute','consistent','comprehensive','concurrent','corroborate','coherent'],
+};
+
+const SYNONYMS={
+'big':['large','huge','enormous','vast','immense','gigantic'],
+'small':['tiny','little','minor','slight','miniature'],
+'good':['excellent','superb','outstanding','remarkable','fine'],
+'bad':['terrible','awful','dreadful','poor','inferior'],
+'important':['significant','crucial','vital','essential','paramount'],
+'difficult':['challenging','demanding','tough','arduous','formidable'],
+'beautiful':['gorgeous','stunning','magnificent','exquisite','elegant'],
+'happy':['joyful','delighted','cheerful','content','elated','ebullient'],
+'sad':['melancholy','sorrowful','gloomy','lugubrious','dejected'],
+'fast':['rapid','swift','quick','expedient','prompt'],
+'help':['assist','aid','support','facilitate','alleviate'],
+'destroy':['demolish','devastate','annihilate','eradicate','obliterate'],
+'improve':['enhance','ameliorate','refine','upgrade','bolster'],
+'reduce':['diminish','decrease','curtail','mitigate','alleviate'],
+'explain':['clarify','elucidate','illustrate','elaborate','expound'],
+'change':['transform','modify','alter','convert','revise'],
+'stop':['cease','halt','discontinue','terminate','suspend'],
+'think':['contemplate','ponder','reflect','consider','speculate'],
+'persuade':['convince','coax','cajole','sway','influence'],
+};
+
+const ANTONYMS={
+'big':'small','good':'bad','happy':'sad','fast':'slow','long':'short','hot':'cold','old':'new','young':'old',
+'light':'dark','open':'close','begin':'end','easy':'difficult','beautiful':'ugly','love':'hate',
+'increase':'decrease','accept':'reject','success':'failure','strength':'weakness','improve':'deteriorate',
+'transparent':'opaque','volatile':'stable','abundant':'scarce','generous':'parsimonious','loquacious':'taciturn',
+'bellicose':'peaceful','ebullient':'torpid','diligent':'indolent','magnanimous':'petty','sanguine':'pessimistic',
+};
+
+function getRelated(word){
+  const w=word.toLowerCase();const result={roots:[],prefix:null,synonyms:[],antonym:null,family:[]};
+  // Find root
+  for(const[root,words]of Object.entries(ROOTS)){
+    if(words.some(x=>x.toLowerCase()===w)||w.includes(root)){
+      result.roots.push({root,words:words.filter(x=>x.toLowerCase()!==w)});
+    }
+  }
+  // Find prefix
+  for(const[pfx,words]of Object.entries(PREFIXES)){
+    if(words.some(x=>x.toLowerCase()===w)){result.prefix={pfx,words:words.filter(x=>x.toLowerCase()!==w).slice(0,5)};}
+  }
+  // Synonyms
+  for(const[key,syns]of Object.entries(SYNONYMS)){
+    if(key===w)result.synonyms=syns.slice(0,6);
+    else if(syns.includes(w)){result.synonyms=[key,...syns.filter(x=>x!==w)].slice(0,6)}
+  }
+  // Antonyms
+  if(ANTONYMS[w])result.antonym=ANTONYMS[w];
+  for(const[k,v]of Object.entries(ANTONYMS)){if(v===w)result.antonym=k}
+  return result;
+}
+
+function renderRelated(word){
+  const r=getRelated(word);if(!r.roots.length&&!r.prefix&&!r.synonyms.length&&!r.antonym)return'';
+  let h='<div class="mt-3 pt-3 border-t border-slate-700/50">';
+  h+='<div class="text-slate-500 text-xs mb-2">🔗 Связи</div>';
+  if(r.roots.length){r.roots.forEach(x=>{h+=`<div class="mb-1"><span class="text-indigo-400 text-xs font-mono">/${x.root}/</span> <span class="text-slate-400 text-xs">${x.words.slice(0,4).join(', ')}</span></div>`})}
+  if(r.prefix){h+=`<div class="mb-1"><span class="text-purple-400 text-xs font-mono">${r.prefix.pfx}</span> <span class="text-slate-400 text-xs">${r.prefix.words.join(', ')}</span></div>`}
+  if(r.synonyms.length){h+=`<div class="mb-1"><span class="text-green-400 text-xs">= </span><span class="text-slate-400 text-xs">${r.synonyms.join(', ')}</span></div>`}
+  if(r.antonym){h+=`<div class="mb-1"><span class="text-red-400 text-xs">≠ </span><span class="text-slate-400 text-xs">${r.antonym}</span></div>`}
+  h+='</div>';return h;
+}
+
+// === ACTIVE RECALL (Sentence mode) ===
+async function checkSentence(){
+  const cW=S.sQ[S.cI];if(!cW)return;
+  const inp=document.getElementById('si');if(!inp)return;
+  const sentence=inp.value.trim();if(!sentence){toast('Напиши предложение!','#ef4444');return}
+  S.typed=sentence;
+  const cfg=getAIConfig();
+  if(!cfg.key){
+    // Fallback: just check if word is present
+    const hasWord=sentence.toLowerCase().includes(cW.w.toLowerCase());
+    S.sentenceResult={ok:hasWord,feedback:hasWord?'Слово использовано. Добавь AI ключ для полной проверки.':'Слово не найдено в предложении.'};
+    S.sA=true;render();setTimeout(()=>ans(hasWord?3:1),1500);return;
+  }
+  document.getElementById('s-check-btn').textContent='⏳...';document.getElementById('s-check-btn').disabled=true;
+  try{
+    const r=await fetch(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':cfg.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:cfg.model,max_tokens:200,system:'You are an English teacher. Evaluate the sentence. Respond in JSON: {"correct":true/false,"score":1-5,"grammar":"ok or error description","usage":"ok or how to improve","better":"improved version or null"}. Be encouraging but honest. Respond ONLY with JSON.',
+        messages:[{role:'user',content:`Student used the word "${cW.w}" (meaning: ${cW.tr}) in this sentence: "${sentence}". Evaluate grammar, word usage correctness, and naturalness.`}]})});
+    const d=await r.json();const txt=d.content[0].text;
+    const json=JSON.parse(txt.replace(/```json\n?/g,'').replace(/```/g,'').trim());
+    S.sentenceResult={ok:json.correct&&json.score>=3,...json};
+    S.sA=true;render();setTimeout(()=>ans(json.correct&&json.score>=3?3:1),2000);
+  }catch(e){
+    S.sentenceResult={ok:sentence.toLowerCase().includes(cW.w.toLowerCase()),feedback:'AI недоступен. Проверка по наличию слова.'};
+    S.sA=true;render();setTimeout(()=>ans(S.sentenceResult.ok?3:1),1500);
   }
 }
 
-// Init
-render();
+// === CEFR LEVEL ESTIMATOR ===
+const CEFR_FREQ={
+  'A1':new Set(['be','have','do','say','go','get','make','know','think','come','want','use','find','give','tell','work','call','try','ask','need','feel','become','leave','put','mean','keep','let','begin','seem','help','show','hear','play','run','move','live','believe','bring','happen','write','sit','stand','lose','pay','meet','include','continue','set','learn','change','lead','understand','watch','follow','stop','create','speak','read','allow','add','spend','grow','open','walk','win','offer','remember','love','consider','appear','buy','wait','serve','die','send','expect','build','stay','fall','cut','reach','kill','remain']),
+  'A2':new Set(['achieve','accept','according','account','across','act','actually','add','admit','affect','afford','agree','almost','along','amount','another','anyway','apart','appear','apply','area','arrange','arrive','article','attention','available','avoid','aware','based','basic','become','behavior','belong','benefit','beyond','board','border','born','brain','break','breath','bright','burn','calm','capital','career','careful','carry','cause','central','century','chance','character','charge','choice','circle','claim','clear','climb','collect','combine','comfort','comment','common','community','compare','complete','concern','condition','confident','connect','conscious','contact','contain','content','context','control','conversation','copy','corner','correct','count','couple','courage','cover','cross','culture','current','customer','damage','danger','data','deal','death','debate','decision','deep','deliver','demand','department','depend','describe','design','desire','despite','detail','determine','develop','difference','direct','disappear','discover','discuss','disease','distance','divide','document','doubt','draw','dress','drink','drive','drop','earn','edge','education','effective','election','emotion','employ','encourage','energy','engine','enjoy','enormous','enter','environment','equal','escape','especially','establish','even','evening','event','evidence','exactly','examine','example','exchange','excite','exercise','exist','expand','expect','experience','experiment','expert','express','extend','extra','extreme','face','facility','factor','fail','fair','familiar','famous','favor','fear','feature','feed','figure','fill','final','finger','finish','firm','fit','fix','flat','flight','flow','focus','force','foreign','forget','form','former','forward','found','frame','freedom','fresh','front','function','fund','future','gain','gather','general','gentle','glad','global','goal','golden','govern','graduate','grand','grant','gray','green','ground','guard','guess','guide','hang','handle','hardly','hate','head','health','heavy','height','hide','hill','hire','history','hit','hold','hole','holiday','honor','household','huge','human','humor','hunt','hurry','idea','identify','ignore','image','imagine','impact','import','impose','impress','improve','incident','income','indeed','indicate','individual','industry','influence','inform','initial','injury','inner','innocent','input','insert','inside','insist','instead','institution','intend','interest','internal','internet','interpret','introduce','invest','investigate','involve','island','issue','item','join','judge','junior','justice','keen','key','kick','kitchen','knee','knock','knowledge','labor','lack','lady','land','language','largely','launch','layer','league','lean','learn','least','legal','length','lesson','level','library','lift','likely','limit','link','lip','list','literature','load','local','locate','lonely','loose','lord','lovely','lower','luck','lunch','machine','magazine','maintain','major','manage','mark','market','marry','mass','master','match','material','matter','maybe','mayor','meal','meaning','measure','media','medical','memory','mental','mention','merely','message','metal','method','middle','military','mine','minister','minor','minute','mirror','mission','mix','model','modern','modest','moment','mood','moral','motion','mountain','mouse','mount','muscle','mystery','narrow','nation','native','natural','nature','negative','nervous','network','nevertheless','noise','none','normal','northern','note','notice','novel','nowhere','nuclear','numerous','object','observe','obtain','obvious','occasion','occupy','odd','official','online','operate','opinion','oppose','option','order','ordinary','organize','origin','otherwise','outcome','output','outside','overcome','owner','pace','pack','panel','parent','park','partner','passage','passenger','passion','path','pattern','pause','peer','perhaps','permit','personal','phase','philosophy','photograph','phrase','physical','pick','picture','piece','planet','platform','plenty','pocket','poem','poet','policy','politics','pollution','pool','popular','population','portion','positive','possibility','possibly','post','potential','pound','pour','poverty','powerful','practical','predict','prefer','prepare','present','president','press','pressure','previous','price','primary','principle','print','prison','private','prize','probably','proceed','process','product','professor','profit','program','progress','project','promise','promote','proper','property','proportion','proposal','protect','protest','prove','publish','pull','punch','purpose','pursue','push','quarter','question','quiet','quote','race','radio','rain','raise','range','rapid','rare','rather','react','reality','realize','reasonable','recall','recognize','recommend','record','refer','reflect','reform','refuse','regard','region','regular','reject','relate','relationship','relative','release','relevant','relief','religion','rely','remark','remind','remove','repeat','replace','represent','republic','reputation','request','require','research','resident','resist','resource','respond','responsible','rest','restore','restrict','reveal','review','revolution','reward','rich','ring','rise','rough','route','royal','rural','rush','safe','sail','sale','sample','satisfaction','satisfy','scale','scene','schedule','scheme','scope','screen','search','secret','secretary','section','secure','seek','select','senior','sense','sensitive','separate','sequence','series','serious','session','settle','severe','sexual','shake','shape','sharp','sheet','shelter','shift','shout','shut','sight','sign','significant','silence','silly','similar','simple','sink','site','situation','skill','skin','sleep','slip','smart','smell','smooth','snap','soft','soil','soldier','solution','somewhat','sort','soul','southern','speech','speed','spirit','split','sport','spot','spread','spring','square','stable','staff','stage','standard','stare','state','statement','station','status','steal','steam','steel','step','stick','stiff','stock','stomach','storm','strategy','strength','stretch','strike','string','strip','struggle','student','stuff','stupid','style','subject','succeed','suddenly','suffer','suggest','suit','supply','suppose','surface','surprise','surround','survey','survive','suspect','sweet','swing','switch','sympathy','system','target','task','tax','technique','technology','temperature','tend','terrible','test','thank','theater','theme','theory','thick','thin','threaten','throat','throughout','throw','thus','tight','tiny','title','tone','tongue','tool','topic','totally','tough','tour','tower','track','trade','tradition','traffic','train','transfer','travel','treasure','treat','trend','trial','trick','trip','troop','trust','truth','tube','turn','twice','typical','ugly','unable','union','unique','unit','universal','university','unless','unlikely','unusual','upper','upset','urban','used','useful','usual','valley','value','vast','vehicle','version','victim','victory','village','violence','virtually','visible','vital','voice','volume','volunteer','vote','wage','waste','wave','weakness','wealth','weapon','weather','website','weekend','weigh','weird','welcome','western','wheel','whenever','whereas','widely','wild','willing','wing','wire','wise','withdraw','witness','wonder','wooden','worried','worth','wrap','yesterday','youth','zone']),
+};
+function estimateCEFR(text){
+  const words=text.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>=3);
+  const unique=new Set(words);
+  let a1=0,a2=0,other=0;
+  unique.forEach(w=>{if(CEFR_FREQ.A1.has(w))a1++;else if(CEFR_FREQ.A2.has(w))a2++;else other++});
+  const total=unique.size||1;
+  const advancedPct=other/total;
+  if(advancedPct>0.5)return{level:'C1-C2',desc:'Продвинутый',color:'text-red-400'};
+  if(advancedPct>0.35)return{level:'B2',desc:'Выше среднего',color:'text-purple-400'};
+  if(advancedPct>0.2)return{level:'B1',desc:'Средний',color:'text-yellow-400'};
+  if(advancedPct>0.1)return{level:'A2',desc:'Элементарный',color:'text-blue-400'};
+  return{level:'A1',desc:'Начальный',color:'text-green-400'};
+}
 
-// Service Worker
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+// === AUDIO MODE (hands-free) ===
+let audioPlaying=false,audioQueue=[],audioIdx=0,audioPaused=false,audioSpeed=1;
+const AUDIO_PAUSE=2500; // ms pause between word and translation
+const AUDIO_GAP=1500; // ms gap between cards
+
+function startAudioMode(lv,mode){
+  const db=getDB();let q=(db[lv]||[]).map((w,i)=>({w:w[0],tr:w[1],ex:w[2],lv,i}));
+  if(mode==='due'){const now=Date.now();q=q.filter(x=>{const c=getCard(x.lv,x.i);return c.st>0&&c.due<=now})}
+  else if(mode==='new'){q=q.filter(x=>getCard(x.lv,x.i).st===0).slice(0,20)}
+  if(!q.length){toast('Нет слов для аудио','#6366f1');return}
+  audioQueue=q;audioIdx=0;audioPaused=false;audioPlaying=true;S.sc='audio';render();playNextAudio();
+}
+function startAudioAll(){
+  const items=getDailyReview();if(!items.length){toast('Нет слов для повторения','#6366f1');return}
+  const db=getDB();audioQueue=items.slice(0,40).map(x=>({w:db[x.l][x.i][0],tr:db[x.l][x.i][1],ex:db[x.l][x.i][2],lv:x.l,i:x.i}));
+  audioIdx=0;audioPaused=false;audioPlaying=true;S.sc='audio';render();playNextAudio();
+}
+function playNextAudio(){
+  if(!audioPlaying||audioPaused||audioIdx>=audioQueue.length){
+    if(audioIdx>=audioQueue.length&&audioPlaying){audioPlaying=false;toast('Аудио сессия завершена! 🎧');S.sc='levels';render()}
+    return;
+  }
+  const item=audioQueue[audioIdx];render();
+  // Speak English word
+  doSpeak(item.w);
+  // After pause, speak Russian translation
+  setTimeout(()=>{
+    if(!audioPlaying||audioPaused)return;
+    // Speak Russian
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(item.tr);u.lang='ru-RU';u.rate=0.9;
+      const v=speechSynthesis.getVoices();const p=v.find(x=>x.lang.startsWith('ru'));if(p)u.voice=p;
+      speechSynthesis.speak(u);
+    }
+    // Next word after gap
+    setTimeout(()=>{if(!audioPlaying||audioPaused)return;audioIdx++;playNextAudio()},AUDIO_GAP+item.tr.length*80);
+  },AUDIO_PAUSE);
+}
+function toggleAudioPause(){audioPaused=!audioPaused;if(!audioPaused)playNextAudio();render()}
+function stopAudio(){audioPlaying=false;audioPaused=false;speechSynthesis.cancel();S.sc='levels';render()}
+function audioSkip(){speechSynthesis.cancel();audioIdx++;playNextAudio()}
+function audioBack(){speechSynthesis.cancel();audioIdx=Math.max(0,audioIdx-1);playNextAudio()}
+
+// === WORD TOPICS ===
+const TOPICS={
+'👤 Тело':['head','hand','eye','ear','nose','arm','leg','face','heart','foot'],
+'👨‍👩‍👧 Семья':['mother','father','sister','brother','child','boy','girl','man','woman','friend'],
+'🏠 Дом':['house','room','door','window','table','chair','bed','floor','wall','kitchen'],
+'🍎 Еда':['food','bread','milk','egg','meat','rice','cheese','apple','sugar','salt','tea','coffee','juice','cook'],
+'🌍 Природа':['sun','rain','snow','wind','fire','river','sea','tree','flower','bird','star','cloud','garden','mountain'],
+'🎨 Цвета':['red','green','blue','yellow','white','black'],
+'🏃 Действия':['run','eat','sleep','walk','sit','stand','talk','listen','read','write','play','swim','fly','drive','cook','wash','dance','sing','wait'],
+'💼 Работа':['work','money','school','buy','lead','hire','publish','perform','succeed','fail','achieve','effort','skill','talent','result','strategy'],
+'💭 Мышление':['think','know','believe','remember','imagine','realize','understand','assume','recognize','determine','consider','anticipate','perceive','contemplate','speculate'],
+'❤️ Эмоции':['happy','love','smile','cry','afraid','calm','eager','emotion','courage','doubt','generous','honest','patient'],
+'📊 Бизнес':['revenue','deadline','efficiency','expansion','priority','strategy','productivity','allocation','incentive','outcome','demand','supply','benefit'],
+'⚖️ Сложные':['ambiguous','unprecedented','sophisticated','feasible','meticulous','prevalent','resilient','volatile','pragmatic','paradigm'],
+'🎓 Академические':['accomplish','consequence','significant','contribute','establish','evaluate','phenomenon','legislation','accumulate','hypothesis'],
+'👑 Редкие':['acquiesce','ephemeral','quintessential','serendipity','magnanimous','obfuscate','pernicious','conundrum','inexorable','sycophant'],
+};
+
+function getTopicWords(topicName){
+  const words=TOPICS[topicName]||[];const db=getDB();const result=[];
+  words.forEach(w=>{
+    for(let l=1;l<=5;l++){const ws=db[l]||[];
+      const idx=ws.findIndex(x=>x[0].toLowerCase()===w.toLowerCase());
+      if(idx!==-1){result.push({w:ws[idx][0],tr:ws[idx][1],ex:ws[idx][2],h:ws[idx][3],lv:l,i:idx,mode:0});break}
+    }
+  });
+  return result;
+}
+function goTopic(name){
+  const q=getTopicWords(name);if(!q.length)return;
+  S.sQ=q;S.cI=0;S.sA=false;S.sH=false;S.sR=[];S.cL=0;S.sM=null;S.sc='study';S.typed='';S.cOpts=[];S.cAns=null;S.sentenceResult=null;
+  logEvent('session_start',{topic:name,cards:q.length});render();
+}
+
+// === WORD OF THE DAY ===
+function getWordOfDay(){
+  const db=getDB();const all=[];
+  for(let l=2;l<=5;l++){(db[l]||[]).forEach((w,i)=>{const c=getCard(l,i);if(c.st===0)all.push({w:w[0],tr:w[1],ex:w[2],h:w[3],lv:l,i})})}
+  if(!all.length)return null;
+  // Deterministic based on date
+  const d=today();let hash=0;for(let i=0;i<d.length;i++)hash=((hash<<5)-hash)+d.charCodeAt(i);
+  hash=Math.abs(hash);
+  return all[hash%all.length];
+}
+
+// === ACHIEVEMENTS ===
+const BADGES=[
+  {id:'first10',icon:'🌱',name:'Росток',desc:'Выучи 10 слов',check:()=>{const db=getDB();let n=0;for(let l=1;l<=5;l++)(db[l]||[]).forEach((_,i)=>{if(getCard(l,i).reps>=3)n++});return n>=10}},
+  {id:'first50',icon:'🌿',name:'Побег',desc:'Выучи 50 слов',check:()=>{const db=getDB();let n=0;for(let l=1;l<=5;l++)(db[l]||[]).forEach((_,i)=>{if(getCard(l,i).reps>=3)n++});return n>=50}},
+  {id:'first100',icon:'🌳',name:'Дерево',desc:'Выучи 100 слов',check:()=>{const db=getDB();let n=0;for(let l=1;l<=5;l++)(db[l]||[]).forEach((_,i)=>{if(getCard(l,i).reps>=3)n++});return n>=100}},
+  {id:'first300',icon:'🏔',name:'Вершина',desc:'Выучи 300 слов',check:()=>{const db=getDB();let n=0;for(let l=1;l<=5;l++)(db[l]||[]).forEach((_,i)=>{if(getCard(l,i).reps>=3)n++});return n>=300}},
+  {id:'streak3',icon:'🔥',name:'На волне',desc:'3 дня подряд',check:()=>(getStreak().current||0)>=3},
+  {id:'streak7',icon:'💎',name:'Неделя силы',desc:'7 дней подряд',check:()=>(getStreak().current||0)>=7},
+  {id:'streak30',icon:'👑',name:'Король дисциплины',desc:'30 дней подряд',check:()=>(getStreak().current||0)>=30},
+  {id:'speed',icon:'⚡',name:'Скорострел',desc:'Ответь за 2 сек',check:()=>{const log=load(LS_LOG,[]);return log.some(e=>e.type==='answer'&&e.grade>=3&&e.ms&&e.ms<2000)}},
+  {id:'perfect',icon:'💯',name:'Перфекционист',desc:'Сессия без ошибок (10+ слов)',check:()=>{const log=load(LS_LOG,[]);const sessions=[];let cur=null;log.filter(e=>e.type==='answer').forEach(e=>{if(!cur||e.t-cur.end>300000){if(cur)sessions.push(cur);cur={end:e.t,n:0,ok:0}}cur.end=e.t;cur.n++;if(e.grade>=3)cur.ok++});if(cur)sessions.push(cur);return sessions.some(s=>s.n>=10&&s.ok===s.n)}},
+  {id:'night',icon:'🦉',name:'Сова',desc:'Учись после 23:00',check:()=>{const log=load(LS_LOG,[]);return log.some(e=>e.type==='answer'&&new Date(e.t).getHours()>=23)}},
+  {id:'early',icon:'🌅',name:'Жаворонок',desc:'Учись до 7:00',check:()=>{const log=load(LS_LOG,[]);return log.some(e=>e.type==='answer'&&new Date(e.t).getHours()<7)}},
+  {id:'leech',icon:'🗡',name:'Убийца пиявок',desc:'Освой leech-слово',check:()=>{const p=load(LS.p,{});return Object.values(p).some(c=>c.leech&&c.st===2&&c.reps>=3)}},
+  {id:'lvl2',icon:'🔓',name:'Элементарно!',desc:'Открой уровень 2',check:()=>getUL().includes(2)},
+  {id:'lvl3',icon:'🚀',name:'Средний класс',desc:'Открой уровень 3',check:()=>getUL().includes(3)},
+  {id:'lvl5',icon:'🏆',name:'Мастер слов',desc:'Открой уровень 5',check:()=>getUL().includes(5)},
+  {id:'tutor',icon:'🤖',name:'Ученик AI',desc:'Используй AI тьютора',check:()=>{const log=load(LS_LOG,[]);return log.some(e=>e.type==='tutor')}},
+  {id:'reader',icon:'📖',name:'Книголюб',desc:'Добавь слово из чтения',check:()=>{const log=load(LS_LOG,[]);return log.some(e=>e.type==='word_added'&&e.source==='reader')}},
+  {id:'w50day',icon:'🏋️',name:'Марафонец',desc:'50 слов за день',check:()=>{const sk=getStreak();return Object.values(sk.days||{}).some(v=>v>=50)}},
+  {id:'game',icon:'🎮',name:'Игрок',desc:'Сыграй в мини-игру',check:()=>{const log=load(LS_LOG,[]);return log.some(e=>e.type==='game')}},
+];
+
+function getUnlockedBadges(){return BADGES.filter(b=>b.check())}
+function checkNewBadges(){
+  const prev=load('vm2_badges',[]);const now=getUnlockedBadges().map(b=>b.id);
+  const newOnes=now.filter(id=>!prev.includes(id));
+  if(newOnes.length){save('vm2_badges',now);const b=BADGES.find(x=>x.id===newOnes[0]);if(b)toast(b.icon+' '+b.name+'!','#8b5cf6')}
+}
+
+// === MINI-GAMES ===
+let game={type:null,words:[],pairs:[],matched:[],selected:null,score:0,timer:0,timerRef:null,scramble:'',answer:'',attempts:0,roundWords:[],roundIdx:0,roundStart:0};
+
+function startGame(type){
+  const db=getDB();const all=[];
+  for(let l=1;l<=5;l++){if(!getUL().includes(l))continue;(db[l]||[]).forEach((w,i)=>{const c=getCard(l,i);if(c.reps>=1)all.push({w:w[0],tr:w[1],lv:l,i})})}
+  if(all.length<8){toast('Нужно хотя бы 8 изученных слов','#ef4444');return}
+  game={type,words:all,pairs:[],matched:[],selected:null,score:0,timer:0,timerRef:null,scramble:'',answer:'',attempts:0,roundWords:[],roundIdx:0,roundStart:0};
+
+  if(type==='match'){
+    const pick=all.sort(()=>Math.random()-.5).slice(0,6);
+    const left=pick.map((w,i)=>({id:'w'+i,text:w.w,pair:i,type:'word'}));
+    const right=pick.map((w,i)=>({id:'t'+i,text:w.tr,pair:i,type:'trans'}));
+    game.pairs=[...left.sort(()=>Math.random()-.5),...right.sort(()=>Math.random()-.5)];
+    game.matched=[];game.timer=60;
+  }
+  else if(type==='scramble'){
+    game.roundWords=all.sort(()=>Math.random()-.5).slice(0,10);game.roundIdx=0;
+    nextScramble();
+  }
+  else if(type==='speed'){
+    game.roundWords=all.sort(()=>Math.random()-.5).slice(0,30);game.roundIdx=0;game.timer=60;game.roundStart=Date.now();
+  }
+  logEvent('game',{type});S.sc='game';render();
+  if(type!=='scramble')startGameTimer();
+}
+
+function startGameTimer(){if(game.timerRef)clearInterval(game.timerRef);game.timerRef=setInterval(()=>{game.timer--;render();if(game.timer<=0){clearInterval(game.timerRef);endGame()}},1000)}
+function endGame(){if(game.timerRef)clearInterval(game.timerRef);game.type+='_end';render()}
+
+// Match game
+function selectCard(id){
+  if(game.matched.includes(id))return;
+  const card=game.pairs.find(p=>p.id===id);if(!card)return;
+  if(!game.selected){game.selected=card;render();return}
+  if(game.selected.id===id){game.selected=null;render();return}
+  if(game.selected.pair===card.pair&&game.selected.type!==card.type){
+    game.matched.push(game.selected.id,card.id);game.score+=10;game.selected=null;
+    if(game.matched.length===game.pairs.length)endGame();
+    else render();
+  }else{game.score=Math.max(0,game.score-2);const prev=game.selected;game.selected=null;render()}
+}
+
+// Scramble game
+function nextScramble(){
+  if(game.roundIdx>=game.roundWords.length){endGame();return}
+  const w=game.roundWords[game.roundIdx];
+  let chars=w.w.split('');for(let i=chars.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[chars[i],chars[j]]=[chars[j],chars[i]]}
+  if(chars.join('')===w.w&&chars.length>1){[chars[0],chars[1]]=[chars[1],chars[0]]}
+  game.scramble=chars.join('');game.answer='';game.attempts=0;render();
+}
+function checkScramble(){
+  const v=(document.getElementById('scramble-input')||{}).value||'';
+  if(v.toLowerCase().trim()===game.roundWords[game.roundIdx].w.toLowerCase()){
+    game.score+=10-game.attempts*2;game.roundIdx++;nextScramble();
+  }else{game.attempts++;if(game.attempts>=3){game.roundIdx++;nextScramble()}else{toast('Попробуй ещё!','#ef4444');render()}}
+}
+
+// Speed round
+function speedAnswer(ok){
+  if(ok)game.score++;
+  game.roundIdx++;
+  if(game.roundIdx>=game.roundWords.length||game.timer<=0)endGame();
+  else render();
+}
+
+// === ONBOARDING ===
+const ONBOARD_WORDS=[
+  ['cat','кот',1],['house','дом',1],['water','вода',1],['happy','счастливый',1],['run','бежать',1],
+  ['weather','погода',2],['beautiful','красивый',2],['explain','объяснять',2],['imagine','представлять',2],['courage','смелость',2],
+  ['accomplish','достигать',3],['consequence','последствие',3],['negotiate','переговоры',3],['evaluate','оценивать',3],['phenomenon','явление',3],
+  ['ambiguous','неоднозначный',4],['scrutinize','изучать',4],['exacerbate','усугублять',4],['pragmatic','прагматичный',4],['resilient','стойкий',4],
+  ['ephemeral','мимолётный',5],['quintessential','типичнейший',5],['obfuscate','запутывать',5],['sycophant','подхалим',5],['inexorable','неумолимый',5],
+];
+let onboard={idx:0,results:[],done:false};
+
+function startOnboarding(){onboard={idx:0,results:[],done:false};S.sc='onboard';render()}
+function onboardAnswer(knows){
+  onboard.results.push({lv:ONBOARD_WORDS[onboard.idx][2],ok:knows});
+  onboard.idx++;
+  if(onboard.idx>=ONBOARD_WORDS.length){finishOnboarding();return}
+  render();
+}
+function finishOnboarding(){
+  // Calculate level from results
+  const byLv={};onboard.results.forEach(r=>{if(!byLv[r.lv])byLv[r.lv]={ok:0,n:0};byLv[r.lv].n++;if(r.ok)byLv[r.lv].ok++});
+  let suggestedLevel=1;
+  for(let l=5;l>=1;l--){if(byLv[l]&&byLv[l].ok/byLv[l].n>=0.6){suggestedLevel=l;break}}
+  // Unlock levels up to suggested
+  // Mark known words as partially learned
+  const db=getDB();
+  onboard.results.forEach((r,i)=>{
+    if(r.ok){
+      const w=ONBOARD_WORDS[i];
+      for(let l=1;l<=5;l++){const ws=db[l]||[];const idx=ws.findIndex(x=>x[0].toLowerCase()===w[0].toLowerCase());
+        if(idx!==-1){const c=getCard(l,idx);c.st=2;c.step=2;c.reps=3;c.due=Date.now()+86400000;c.ease=2.5;if(!c.firstSeen)c.firstSeen=today();saveCard(l,idx,c);break}}
+    }
+  });
+  onboard.done=true;onboard.suggestedLevel=suggestedLevel;
+  onboard.byLv=byLv;save('vm2_onboarded',true);render();
+}
+
+// === READING MODE ===
+function getWordStatus(word){
+  const w=word.toLowerCase();if(STOP.has(w)||w.length<3)return 'stop';
+  const db=getDB();
+  for(let l=1;l<=5;l++){const ws=db[l]||[];
+    const idx=ws.findIndex(x=>x[0].toLowerCase()===w);
+    if(idx!==-1){const c=getCard(l,idx);
+      if(c.st===2&&c.reps>=3)return 'known';
+      if(c.st>0)return 'learning';
+      return 'new';
+    }
+  }
+  return 'unknown';
+}
+function getWordInfo(word){
+  const w=word.toLowerCase();const db=getDB();
+  for(let l=1;l<=5;l++){const ws=db[l]||[];
+    const idx=ws.findIndex(x=>x[0].toLowerCase()===w);
+    if(idx!==-1)return{found:true,w:ws[idx][0],tr:ws[idx][1],ex:ws[idx][2],h:ws[idx][3],lv:l,i:idx,card:getCard(l,idx)};
+  }
+  return{found:false,w:word,tr:null,lv:null};
+}
+
+function analyzeText(){
+  const txt=document.getElementById('read-input').value.trim();if(!txt){toast('Вставь текст!','#ef4444');return}
+  S.readRaw=txt;
+  // Tokenize preserving punctuation and whitespace
+  const tokens=txt.split(/(\s+|[.,!?;:()"\[\]{}<>\/\\—–\-])/);
+  let known=0,learning=0,neww=0,unknown=0,stopw=0,total=0;
+  let html='';
+  tokens.forEach(tok=>{
+    const clean=tok.replace(/[^a-zA-Z'-]/g,'');
+    if(!clean||!/[a-zA-Z]/.test(tok)){html+=tok.replace(/\n/g,'<br>');return}
+    total++;
+    const status=getWordStatus(clean);
+    let cls='',style='';
+    if(status==='known'){cls='cursor-pointer rounded px-0.5 bg-green-500/20 text-green-300 hover:bg-green-500/40';known++}
+    else if(status==='learning'){cls='cursor-pointer rounded px-0.5 bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/40';learning++}
+    else if(status==='new'){cls='cursor-pointer rounded px-0.5 bg-blue-500/20 text-blue-300 hover:bg-blue-500/40';neww++}
+    else if(status==='unknown'){cls='cursor-pointer rounded px-0.5 bg-red-500/20 text-red-300 hover:bg-red-500/40';unknown++}
+    else{cls='text-slate-500';stopw++}
+    const safe=clean.replace(/'/g,"\\'");
+    if(status!=='stop')html+=`<span class="${cls}" onclick="wordClick('${safe}')">${tok}</span>`;
+    else html+=`<span class="${cls}">${tok}</span>`;
+  });
+  document.getElementById('read-out').innerHTML=html;
+  // Stats
+  const content=total-stopw;
+  const knownPct=content?Math.round((known+learning)/content*100):0;
+  document.getElementById('read-stats').innerHTML=`
+  <div class="bg-slate-800 rounded-xl p-3">
+    <div class="flex justify-between items-center mb-2">
+      <div><span class="text-slate-400 text-xs">Понимание текста</span></div>
+      <div class="flex items-center gap-2"><span class="${estimateCEFR(txt).color} text-xs font-bold">${estimateCEFR(txt).level}</span><span class="text-slate-500 text-xs">${estimateCEFR(txt).desc}</span></div>
+    </div>
+    <div class="flex justify-between text-xs mb-1"><span class="text-white font-bold">${knownPct}%</span></div>
+    <div class="h-2 bg-slate-700 rounded-full overflow-hidden mb-2"><div class="h-full rounded-full" style="width:${knownPct}%;background:linear-gradient(90deg,#22c55e,#eab308)"></div></div>
+    <div class="flex gap-3 text-xs flex-wrap">
+      <span class="text-green-400">✅${known}</span>
+      <span class="text-yellow-400">📖${learning}</span>
+      <span class="text-blue-400">🆕${neww}</span>
+      <span class="text-red-400">❓${unknown}</span>
+      <span class="text-slate-500">${total} слов</span>
+    </div>
+    ${knownPct>=95?'<div class="text-green-400 text-xs mt-2">🎉 Отличный уровень! Текст тебе по силам.</div>':
+     knownPct>=80?'<div class="text-yellow-400 text-xs mt-2">👍 Хороший уровень. Большинство слов знакомы.</div>':
+     knownPct>=60?'<div class="text-amber-400 text-xs mt-2">📚 Есть что изучить. Нажимай на красные слова!</div>':
+     '<div class="text-red-400 text-xs mt-2">💪 Текст сложный. Добавь незнакомые слова!</div>'}
+  </div>`;
+}
+
+let pendingReadWord=null;
+function wordClick(word){
+  const info=getWordInfo(word);
+  const popup=document.getElementById('read-popup');popup.style.display='block';
+  document.getElementById('rp-word').textContent=info.w;
+  pendingReadWord=info;
+
+  if(info.found){
+    document.getElementById('rp-trans').innerHTML=`<span class="text-cyan-300">${info.tr}</span>`;
+    const c=info.card;const stName=c.st===0?'Новое':c.st===2&&c.reps>=3?'Освоено':'Учу';
+    const stCol=c.st===0?'text-blue-400':c.st===2&&c.reps>=3?'text-green-400':'text-yellow-400';
+    document.getElementById('rp-status').innerHTML=`<span class="${stCol}">${stName}</span> | Ур.${info.lv} | ${c.reps} повторений | ${c.lapses} ошибок${c.leech?' | <span class="text-red-400">🩸 Трудное</span>':''}`;
+    document.getElementById('rp-add-btn').textContent='✅ Уже в словаре';document.getElementById('rp-add-btn').disabled=true;
+    document.getElementById('rp-add-btn').className='py-2 px-4 rounded-xl bg-slate-700 text-slate-400 text-sm';
+  }else{
+    document.getElementById('rp-trans').innerHTML='<span class="text-slate-400">Переводим...</span>';
+    document.getElementById('rp-status').innerHTML='<span class="text-red-400">Не в словаре</span>';
+    document.getElementById('rp-add-btn').textContent='➕ Добавить';document.getElementById('rp-add-btn').disabled=false;
+    document.getElementById('rp-add-btn').className='py-2 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold text-sm active:scale-95';
+    // Auto-translate
+    fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(word)+'&langpair=en|ru')
+      .then(r=>r.json()).then(d=>{
+        const tr=(d.responseData.translatedText||'').trim();
+        if(tr&&tr.toLowerCase()!==word.toLowerCase()){
+          document.getElementById('rp-trans').innerHTML=`<span class="text-cyan-300">${tr}</span> <span class="text-slate-600 text-xs">(авто)</span>`;
+          pendingReadWord.autoTr=tr;
+        }else document.getElementById('rp-trans').innerHTML='<span class="text-slate-500">Не удалось перевести</span>';
+      }).catch(()=>{document.getElementById('rp-trans').innerHTML='<span class="text-slate-500">Ошибка перевода</span>'});
+  }
+  doSpeak(word);
+}
+
+function addFromReader(){
+  if(!pendingReadWord||pendingReadWord.found)return;
+  const w=pendingReadWord.w;
+  const tr=pendingReadWord.autoTr||'???';
+  if(tr==='???'){toast('Нет перевода — отредактируй вручную','#ef4444');return}
+  const l=+document.getElementById('rp-level').value;
+  const uw=loadUW();uw[l].push([w,tr,w+'.',tr.split(' ')[0]]);save(LS.u,uw);
+  toast('+1: '+w);
+  document.getElementById('read-popup').style.display='none';
+  logEvent('word_added',{w,tr,lv:l,source:'reader'});
+  // Re-analyze to update colors
+  analyzeText();
+}
+
+function showTab(id){['s','b','p'].forEach(t=>{const p=document.getElementById('panel-'+t);const b=document.getElementById('tab-'+t);if(p)p.style.display=t===id?'block':'none';if(b)b.className='flex-1 py-2 rounded-lg text-xs '+(t===id?'bg-indigo-600 text-white font-semibold':'bg-slate-800 text-slate-400')})}
+
+// First launch check
+if(!load('vm2_onboarded',false)){S.sc='onboard_intro'}
+render();checkNewBadges();
+
+// Keyboard shortcuts (desktop)
+document.addEventListener('keydown',e=>{
+  if(S.sc!=='study')return;
+  const cW=S.sQ[S.cI];if(!cW)return;
+  if(e.key===' '&&!S.sA&&cW.mode<=1){e.preventDefault();S.sA=true;render()}
+  else if(S.sA&&cW.mode<=1){
+    if(e.key==='1')ans(1);else if(e.key==='2')ans(3);else if(e.key==='3')ans(4);
+    else if(e.key==='ArrowLeft')ans(1);else if(e.key==='ArrowRight')ans(3);
+  }
+});
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
