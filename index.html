@@ -165,7 +165,11 @@ const BG='min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)';
 
 function gP(l){const db=getDB();const ws=db[l]||[];if(!ws.length)return 0;return ws.filter((_,i)=>{const c=getCard(l,i);return c.st===2&&c.reps>=3}).length/ws.length}
 function gS(l){const db=getDB();const ws=db[l]||[];let m=0,lrn=0,nw=0;ws.forEach((_,i)=>{const c=getCard(l,i);if(c.st===2&&c.reps>=3)m++;else if(c.st>0)lrn++;else nw++});return{m,lrn,nw,t:ws.length}}
-function getUL(){const u=[1];for(let l=1;l<=4;l++)if(gP(l)>=MT)u.push(l+1);return u}
+function getUL(){
+  const u=[1];const onLv=load('vm2_onboard_level',0);
+  for(let l=1;l<=4;l++){if(gP(l)>=MT||l<onLv)u.push(l+1)}
+  return[...new Set(u)].sort()
+}
 
 // === ANALYTICS ENGINE ===
 const LS_LOG='vm2_log', LS_CONF='vm2_confusion';
@@ -415,7 +419,7 @@ function render(){
         <div class="text-indigo-400 font-semibold">${LN[onboard.suggestedLevel]}</div>
         <div class="mt-4 text-left">${lvlResults}</div>
       </div>
-      <button onclick="S.sc='levels';render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать обучение! 🚀</button>
+      <button onclick="S.sc='levels';S.sM=${onboard.suggestedLevel};render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать обучение! 🚀</button>
       </div></div>`;
     }
     return}
@@ -726,7 +730,7 @@ function render(){
       <button onclick="const c=getAIConfig();c.key=document.getElementById('cfg-ai-key').value.trim();c.model=document.getElementById('cfg-ai-model').value.trim()||'claude-sonnet-4-20250514';saveAIConfig(c);toast('AI настройки сохранены!')" class="w-full py-2 rounded-xl bg-purple-600 text-white font-semibold text-sm active:scale-95">Сохранить AI настройки</button>
     </div>
     <div class="mt-4 pt-4 border-t border-slate-700">
-      <button onclick="save('vm2_onboarded',false);S.sc='onboard_intro';render()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-sm active:scale-95">🎯 Пройти тест уровня заново</button>
+      <button onclick="save('vm2_onboarded',false);save('vm2_onboard_level',0);S.sc='onboard_intro';render()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-sm active:scale-95">🎯 Пройти тест уровня заново</button>
     </div>
     </div></div>`;return}
 
@@ -1303,7 +1307,7 @@ function finishOnboarding(){
     }
   });
   onboard.done=true;onboard.suggestedLevel=suggestedLevel;
-  onboard.byLv=byLv;save('vm2_onboarded',true);render();
+  onboard.byLv=byLv;save('vm2_onboarded',true);save('vm2_onboard_level',suggestedLevel);render();
 }
 
 // === READING MODE ===
