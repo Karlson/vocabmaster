@@ -390,15 +390,19 @@ function render(){
 
   // ONBOARDING INTRO
   if(S.sc==='onboard_intro'){
-    a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center" style="padding-top:15vh">
-    <div class="text-6xl mb-6">📚</div>
-    <h1 class="text-3xl font-bold text-white mb-3">VocabMaster</h1>
-    <p class="text-slate-400 mb-8">Умное приложение для изучения английских слов с AI, интервальным повторением и мини-играми</p>
-    <button onclick="startOnboarding()" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95 mb-3">🎯 Определить мой уровень</button>
-    <div class="text-slate-500 text-xs mb-2">Или выбери уровень вручную:</div>
-    <div class="grid grid-cols-5 gap-2 mb-3">${[1,2,3,4,5].map(l=>`<button onclick="save('vm2_onboarded',true);save('vm2_onboard_level',${l});S.sc='levels';S.sM=${l};render()" class="py-3 rounded-xl bg-gradient-to-br ${LC[l].bg} text-white font-bold text-sm active:scale-95">${l}</button>`).join('')}</div>
-    <div class="flex justify-between text-xs text-slate-600 px-1"><span>Beginner</span><span>Advanced</span></div>
-    </div></div>`;return}
+    const lvlBtns=[1,2,3,4,5].map(function(l){
+      return '<button onclick="save(\'vm2_onboarded\',true);save(\'vm2_onboard_level\','+l+');S.sc=\'levels\';S.sM='+l+';render()" class="py-3 rounded-xl bg-gradient-to-br '+LC[l].bg+' text-white font-bold text-sm active:scale-95">'+l+'</button>';
+    }).join('');
+    a.innerHTML='<div style="'+BG+'" class="p-4"><div class="max-w-md mx-auto text-center" style="padding-top:15vh">'
+    +'<div class="text-6xl mb-6">📚</div>'
+    +'<h1 class="text-3xl font-bold text-white mb-3">VocabMaster</h1>'
+    +'<p class="text-slate-400 mb-8">Умное приложение для изучения английских слов с AI, интервальным повторением и мини-играми</p>'
+    +'<button onclick="startOnboarding()" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95 mb-3">🎯 Определить мой уровень</button>'
+    +'<div class="text-slate-500 text-xs mb-2">Или выбери уровень вручную:</div>'
+    +'<div class="grid grid-cols-5 gap-2 mb-3">'+lvlBtns+'</div>'
+    +'<div class="flex justify-between text-xs text-slate-600 px-1"><span>Beginner</span><span>Advanced</span></div>'
+    +'</div></div>';
+    return}
 
   // ONBOARDING
   if(S.sc==='onboard'){
@@ -420,20 +424,21 @@ function render(){
       </div>
       </div></div>`;
     }else{
+      const sl=onboard.suggestedLevel||load('vm2_onboard_level',1);
       let lvlResults='';for(let l=1;l<=5;l++){const s=onboard.byLv[l];if(!s)continue;const pct=Math.round(s.ok/s.n*100);
-        lvlResults+=`<div class="flex items-center gap-2 mb-1"><span class="text-slate-400 text-xs w-8">Ур.${l}</span><div class="flex-1 h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full ${LC[l].b} rounded-full" style="width:${pct}%"></div></div><span class="text-white text-xs w-10 text-right">${pct}%</span></div>`}
-      a.innerHTML=`<div style="${BG}" class="p-4"><div class="max-w-md mx-auto text-center">
-      <div class="text-5xl mb-4">🎉</div>
-      <h2 class="text-2xl font-bold text-white mb-2">Тест завершён!</h2>
-      <div class="bg-slate-800 rounded-2xl p-6 mt-4">
-        <div class="text-slate-400 text-sm mb-2">Твой уровень:</div>
-        <div class="text-4xl font-bold text-white mb-1">${onboard.suggestedLevel}</div>
-        <div class="text-indigo-400 font-semibold">${LN[onboard.suggestedLevel]}</div>
-        <div class="mt-4 text-left">${lvlResults}</div>
-      </div>
-      <button onclick="S.sc='levels';S.sM=load('vm2_onboard_level',1);render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать с уровня ${onboard.suggestedLevel}! 🚀</button>
-      <button onclick="S.sc='levels';render()" class="w-full mt-2 py-2 rounded-xl bg-slate-800 text-slate-400 text-sm">К списку уровней</button>
-      </div></div>`;
+        lvlResults+='<div class="flex items-center gap-2 mb-1"><span class="text-slate-400 text-xs w-8">Ур.'+l+'</span><div class="flex-1 h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full '+LC[l].b+' rounded-full" style="width:'+pct+'%"></div></div><span class="text-white text-xs w-10 text-right">'+pct+'%</span></div>'}
+      a.innerHTML='<div style="'+BG+'" class="p-4"><div class="max-w-md mx-auto text-center">'
+      +'<div class="text-5xl mb-4">🎉</div>'
+      +'<h2 class="text-2xl font-bold text-white mb-2">Тест завершён!</h2>'
+      +'<div class="bg-slate-800 rounded-2xl p-6 mt-4">'
+      +'<div class="text-slate-400 text-sm mb-2">Твой уровень:</div>'
+      +'<div class="text-4xl font-bold text-white mb-1">'+sl+'</div>'
+      +'<div class="text-indigo-400 font-semibold">'+LN[sl]+'</div>'
+      +'<div class="mt-4 text-left">'+lvlResults+'</div>'
+      +'</div>'
+      +'<button onclick="S.sc=\'levels\';S.sM=load(\'vm2_onboard_level\',1);render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать с уровня '+sl+'! 🚀</button>'
+      +'<button onclick="S.sc=\'levels\';render()" class="w-full mt-2 py-2 rounded-xl bg-slate-800 text-slate-400 text-sm">К списку уровней</button>'
+      +'</div></div>';
     }
     return}
 
