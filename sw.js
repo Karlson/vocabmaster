@@ -1,4 +1,4 @@
-const CACHE = 'vocabmaster-v4';
+const CACHE = 'vocabmaster-v5';
 const URLS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
