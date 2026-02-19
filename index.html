@@ -167,8 +167,18 @@ function gP(l){const db=getDB();const ws=db[l]||[];if(!ws.length)return 0;return
 function gS(l){const db=getDB();const ws=db[l]||[];let m=0,lrn=0,nw=0;ws.forEach((_,i)=>{const c=getCard(l,i);if(c.st===2&&c.reps>=3)m++;else if(c.st>0)lrn++;else nw++});return{m,lrn,nw,t:ws.length}}
 function getUL(){
   const u=[1];const onLv=load('vm2_onboard_level',0);
-  for(let l=1;l<=4;l++){if(gP(l)>=MT||l<onLv)u.push(l+1)}
-  return[...new Set(u)].sort()
+  for(let l=1;l<=4;l++){
+    // Unlock if: mastered 70% OR onboarding unlocked it
+    if(gP(l)>=MT || l < onLv){u.push(l+1)}
+  }
+  // Also unlock based on known word count per level (fallback)
+  const db=getDB();
+  for(let l=1;l<=4;l++){
+    const ws=db[l]||[];if(!ws.length)continue;
+    const known=ws.filter((_,i)=>{const c=getCard(l,i);return c.reps>=2}).length;
+    if(known>=5 && !u.includes(l+1))u.push(l+1);
+  }
+  return[...new Set(u)].sort();
 }
 
 // === ANALYTICS ENGINE ===
@@ -385,7 +395,9 @@ function render(){
     <h1 class="text-3xl font-bold text-white mb-3">VocabMaster</h1>
     <p class="text-slate-400 mb-8">Умное приложение для изучения английских слов с AI, интервальным повторением и мини-играми</p>
     <button onclick="startOnboarding()" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95 mb-3">🎯 Определить мой уровень</button>
-    <button onclick="save('vm2_onboarded',true);S.sc='levels';render()" class="w-full py-3 rounded-xl bg-slate-800 text-slate-400 text-sm">Пропустить тест →</button>
+    <div class="text-slate-500 text-xs mb-2">Или выбери уровень вручную:</div>
+    <div class="grid grid-cols-5 gap-2 mb-3">${[1,2,3,4,5].map(l=>`<button onclick="save('vm2_onboarded',true);save('vm2_onboard_level',${l});S.sc='levels';S.sM=${l};render()" class="py-3 rounded-xl bg-gradient-to-br ${LC[l].bg} text-white font-bold text-sm active:scale-95">${l}</button>`).join('')}</div>
+    <div class="flex justify-between text-xs text-slate-600 px-1"><span>Beginner</span><span>Advanced</span></div>
     </div></div>`;return}
 
   // ONBOARDING
@@ -419,7 +431,8 @@ function render(){
         <div class="text-indigo-400 font-semibold">${LN[onboard.suggestedLevel]}</div>
         <div class="mt-4 text-left">${lvlResults}</div>
       </div>
-      <button onclick="S.sc='levels';S.sM=${onboard.suggestedLevel};render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать обучение! 🚀</button>
+      <button onclick="S.sc='levels';S.sM=load('vm2_onboard_level',1);render()" class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-lg active:scale-95">Начать с уровня ${onboard.suggestedLevel}! 🚀</button>
+      <button onclick="S.sc='levels';render()" class="w-full mt-2 py-2 rounded-xl bg-slate-800 text-slate-400 text-sm">К списку уровней</button>
       </div></div>`;
     }
     return}
@@ -1292,11 +1305,9 @@ function onboardAnswer(knows){
   render();
 }
 function finishOnboarding(){
-  // Calculate level from results
   const byLv={};onboard.results.forEach(r=>{if(!byLv[r.lv])byLv[r.lv]={ok:0,n:0};byLv[r.lv].n++;if(r.ok)byLv[r.lv].ok++});
   let suggestedLevel=1;
   for(let l=5;l>=1;l--){if(byLv[l]&&byLv[l].ok/byLv[l].n>=0.6){suggestedLevel=l;break}}
-  // Unlock levels up to suggested
   // Mark known words as partially learned
   const db=getDB();
   onboard.results.forEach((r,i)=>{
@@ -1306,8 +1317,20 @@ function finishOnboarding(){
         if(idx!==-1){const c=getCard(l,idx);c.st=2;c.step=2;c.reps=3;c.due=Date.now()+86400000;c.ease=2.5;if(!c.firstSeen)c.firstSeen=today();saveCard(l,idx,c);break}}
     }
   });
+  // Bulk-mark all lower level words as "seen" so levels unlock properly
+  for(let l=1;l<suggestedLevel;l++){
+    const ws=db[l]||[];
+    ws.forEach((_,i)=>{
+      const c=getCard(l,i);
+      if(c.st===0){c.st=1;c.step=1;c.reps=1;c.due=Date.now();if(!c.firstSeen)c.firstSeen=today();saveCard(l,i,c)}
+    });
+  }
   onboard.done=true;onboard.suggestedLevel=suggestedLevel;
-  onboard.byLv=byLv;save('vm2_onboarded',true);save('vm2_onboard_level',suggestedLevel);render();
+  onboard.byLv=byLv;
+  save('vm2_onboarded',true);
+  save('vm2_onboard_level',suggestedLevel);
+  render();
+}
 }
 
 // === READING MODE ===
