@@ -165,35 +165,6 @@ Paste any English text — the app extracts unique words, filters stop words (15
 2. Tap **⋮** menu
 3. **"Add to Home Screen"**
 
-## 🚀 Deploy
-
-### GitHub Pages (free)
-```bash
-git clone https://github.com/YOUR_USER/vocabmaster.git
-cd vocabmaster
-git add .
-git commit -m "deploy"
-git push
-```
-Settings → Pages → Source: main → Save.
-
-Live at: `https://YOUR_USER.github.io/vocabmaster/`
-
-### Vercel (free)
-1. Push to GitHub
-2. Import at [vercel.com](https://vercel.com)
-3. Deploy
-
-## 📁 Project Structure
-```
-vocabmaster/
-├── index.html        # Complete app (HTML + JS + CSS)
-├── manifest.json     # PWA manifest
-├── sw.js             # Service Worker (offline cache)
-├── icon-192.png      # App icon 192x192
-├── icon-512.png      # App icon 512x512
-└── README.md
-```
 
 ## 🔧 Configuration
 
