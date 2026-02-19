@@ -150,6 +150,7 @@ function getStreak(){
   return data;
 }
 function addStudied(n){const data=load(LS.k,{days:{},current:0,best:0,lastDate:''});const d=today();data.days[d]=(data.days[d]||0)+n;data.lastDate=d;save(LS.k,data)}
+function clearAnalytics(){if(confirm('Очистить аналитику?')){save(LS_LOG,[]);save(LS_CONF,{});toast('Очищено');render()}}
 
 // === SPEECH ===
 let soundOn=localStorage.getItem(LS.s)!=='off';
@@ -590,7 +591,7 @@ function render(){
       <div class="text-amber-400 font-semibold text-sm mb-2">Нужен API ключ</div>
       <div class="text-slate-400 text-xs mb-3">Получи ключ на <a href="https://console.anthropic.com" target="_blank" class="text-blue-400 underline">console.anthropic.com</a></div>
       <input id="ai-key-input" type="password" placeholder="sk-ant-..." class="mb-2 text-sm" value="${cfg.key}">
-      <button onclick="const c=getAIConfig();c.key=document.getElementById('ai-key-input').value.trim();saveAIConfig(c);render()" class="w-full py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm active:scale-95">Сохранить</button>
+      <button onclick="saveAIKey()" class="w-full py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm active:scale-95">Сохранить</button>
     </div>`:''}
     ${wordHeader}
     ${tutorWord?`<div class="flex flex-wrap gap-2 mb-4">
@@ -726,7 +727,7 @@ function render(){
     </div>`:''}
 
     <div class="text-slate-600 text-xs text-center">Всего событий: ${an.totalEvents}</div>
-    <button onclick="if(confirm('Очистить аналитику?')){save(LS_LOG,[]);save(LS_CONF,{});toast('Очищено');render()}" class="w-full mt-3 py-2 rounded-xl bg-slate-800 text-red-400 text-xs">🗑 Очистить данные аналитики</button>
+    <button onclick="clearAnalytics()" class="w-full mt-3 py-2 rounded-xl bg-slate-800 text-red-400 text-xs">🗑 Очистить данные аналитики</button>
     </div></div>`;return}
 
   // ADD
@@ -745,10 +746,10 @@ function render(){
       <div class="text-slate-400 text-xs mb-2">Получи ключ на <a href="https://console.anthropic.com" target="_blank" class="text-blue-400 underline">console.anthropic.com</a></div>
       <input id="cfg-ai-key" type="password" placeholder="sk-ant-..." class="mb-2 text-sm" value="${getAIConfig().key}">
       <input id="cfg-ai-model" placeholder="Model" class="mb-2 text-sm" value="${getAIConfig().model}">
-      <button onclick="const c=getAIConfig();c.key=document.getElementById('cfg-ai-key').value.trim();c.model=document.getElementById('cfg-ai-model').value.trim()||'claude-sonnet-4-20250514';saveAIConfig(c);toast('AI настройки сохранены!')" class="w-full py-2 rounded-xl bg-purple-600 text-white font-semibold text-sm active:scale-95">Сохранить AI настройки</button>
+      <button onclick="saveAISettings()" class="w-full py-2 rounded-xl bg-purple-600 text-white font-semibold text-sm active:scale-95">Сохранить AI настройки</button>
     </div>
     <div class="mt-4 pt-4 border-t border-slate-700">
-      <button onclick="save('vm2_onboarded',false);save('vm2_onboard_level',0);S.sc='onboard_intro';render()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-sm active:scale-95">🎯 Пройти тест уровня заново</button>
+      <button onclick="resetOnboard()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-sm active:scale-95">🎯 Пройти тест уровня заново</button>
     </div>
     </div></div>`;return}
 
@@ -885,6 +886,8 @@ function render(){
 const LS_AI='vm2_ai';
 function getAIConfig(){return load(LS_AI,{key:'',endpoint:'https://api.anthropic.com/v1/messages',model:'claude-sonnet-4-20250514'})}
 function saveAIConfig(c){save(LS_AI,c)}
+function saveAISettings(){const c=getAIConfig();c.key=document.getElementById('cfg-ai-key').value.trim();c.model=document.getElementById('cfg-ai-model').value.trim()||'claude-sonnet-4-20250514';saveAIConfig(c);toast('AI настройки сохранены!')}
+function saveAIKey(){const c=getAIConfig();c.key=document.getElementById('ai-key-input').value.trim();saveAIConfig(c);render()}
 
 async function askAI(prompt,context){
   const cfg=getAIConfig();
@@ -1303,6 +1306,7 @@ const ONBOARD_WORDS=[
 let onboard={idx:0,results:[],done:false};
 
 function startOnboarding(){onboard={idx:0,results:[],done:false};S.sc='onboard';render()}
+function resetOnboard(){save('vm2_onboarded',false);save('vm2_onboard_level',0);S.sc='onboard_intro';render()}
 function onboardAnswer(knows){
   onboard.results.push({lv:ONBOARD_WORDS[onboard.idx][2],ok:knows});
   onboard.idx++;
