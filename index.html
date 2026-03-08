@@ -43,6 +43,59 @@ const LEVELS={
     ['dream','мечта','Follow dream.','желание'],['heart','сердце','Kind heart.','орган'],['voice','голос','Loud voice.','звук'],['phone','телефон','Phone rang.','звонить'],['bed','кровать','Go to bed.','спать'],
     ['bag','сумка','Heavy bag.','нести'],['egg','яйцо','Boiled egg.','еда'],['rice','рис','Boil rice.','крупа'],['apple','яблоко','Red apple.','фрукт'],['tea','чай','Hot tea.','напиток'],
     ['coffee','кофе','Black coffee.','напиток'],['key','ключ','My key.','дверь'],['cup','чашка','Cup of tea.','посуда'],['meat','мясо','Eat meat.','еда'],['sugar','сахар','Sweet sugar.','сладкое'],
+    // Дом и быт
+    ['window','окно','Open the window.','в стене'],['door','дверь','Close the door.','вход'],['table','стол','Sit at the table.','мебель'],['chair','стул','Take a chair.','мебель'],['lamp','лампа','Turn on the lamp.','свет'],
+    ['mirror','зеркало','Look in the mirror.','отражение'],['clock','часы','Check the clock.','время'],['towel','полотенце','Use a towel.','после душа'],['soap','мыло','Wash with soap.','гигиена'],['brush','щётка','Brush your teeth.','чистить'],
+    ['shelf','полка','Books on the shelf.','хранение'],['drawer','ящик','Open the drawer.','мебель'],['pillow','подушка','Soft pillow.','спать'],['blanket','одеяло','Warm blanket.','спать'],['curtain','занавеска','Close the curtain.','окно'],
+    // Одежда
+    ['shirt','рубашка','White shirt.','одежда'],['shoes','туфли/обувь','New shoes.','ноги'],['jacket','куртка','Wear a jacket.','верхняя одежда'],['hat','шапка/шляпа','Wear a hat.','голова'],['glasses','очки','Put on glasses.','зрение'],
+    ['wallet','кошелёк','Lost my wallet.','деньги'],['watch','часы','Check my watch.','запястье'],['ring','кольцо','Gold ring.','украшение'],['belt','ремень','Tighten the belt.','талия'],['scarf','шарф','Wear a scarf.','шея'],
+    // Природа и погода
+    ['rain','дождь','It will rain.','осадки'],['snow','снег','White snow.','зима'],['wind','ветер','Strong wind.','движение воздуха'],['cloud','облако','Dark clouds.','небо'],['tree','дерево','Big tree.','природа'],
+    ['flower','цветок','Beautiful flower.','растение'],['grass','трава','Green grass.','газон'],['river','река','Wide river.','вода'],['sea','море','Blue sea.','вода'],['sky','небо','Blue sky.','над нами'],
+    ['moon','луна','Full moon.','ночное светило'],['star','звезда','Bright star.','космос'],['mountain','гора','High mountain.','рельеф'],['forest','лес','Deep forest.','деревья'],['beach','пляж','Sandy beach.','море+песок'],
+    // Транспорт
+    ['car','машина','Drive a car.','транспорт'],['bus','автобус','Take the bus.','общественный транспорт'],['train','поезд','Catch the train.','железная дорога'],['bike','велосипед','Ride a bike.','2 колеса'],['road','дорога','Long road.','путь'],
+    ['street','улица','Busy street.','город'],['bridge','мост','Cross the bridge.','соединяет берега'],['station','станция','At the station.','остановка'],['traffic','трафик','Heavy traffic.','пробки'],['parking','парковка','Find parking.','машины стоят'],
+    // Еда и напитки
+    ['bread','хлеб','Fresh bread.','выпечка'],['milk','молоко','Cold milk.','напиток'],['butter','масло','Spread butter.','жирное'],['cheese','сыр','Yellow cheese.','молочный'],['soup','суп','Hot soup.','первое блюдо'],
+    ['salad','салат','Green salad.','овощи'],['pasta','паста','Italian pasta.','мучное'],['chocolate','шоколад','Dark chocolate.','сладкое'],['ice cream','мороженое','Cold ice cream.','десерт'],['sandwich','бутерброд','Quick sandwich.','перекус'],
+    // Тело и здоровье
+    ['head','голова','My head hurts.','тело'],['hand','рука','Shake hands.','тело'],['eye','глаз','Blue eyes.','тело'],['mouth','рот','Open your mouth.','тело'],['hair','волосы','Long hair.','тело'],
+    ['back','спина','Back pain.','тело'],['stomach','живот','Empty stomach.','тело'],['tooth','зуб','Sore tooth.','тело'],['skin','кожа','Soft skin.','тело'],['blood','кровь','Blood test.','тело'],
+    // Семья и люди
+    ['mother','мать','My mother.','семья'],['father','отец','My father.','семья'],['sister','сестра','My sister.','семья'],['brother','брат','My brother.','семья'],['child','ребёнок','Happy child.','семья'],
+    ['baby','младенец','Cute baby.','семья'],['husband','муж','My husband.','семья'],['wife','жена','My wife.','семья'],['neighbour','сосед','Nice neighbour.','рядом живёт'],['stranger','незнакомец','A stranger.','не знакомы'],
+    // Место и направление
+    ['home','дом/домой','Go home.','место жительства'],['school','школа','Go to school.','учёба'],['shop','магазин','At the shop.','покупки'],['hospital','больница','At the hospital.','лечение'],['park','парк','Walk in the park.','отдых'],
+    ['office','офис','At the office.','работа'],['bank','банк','Go to the bank.','деньги'],['market','рынок','At the market.','покупки'],['library','библиотека','At the library.','книги'],['church','церковь','Old church.','религия'],
+    // Действия повседневные
+    ['wake up','проснуться','Wake up early.','начало дня'],['sleep','спать','Need to sleep.','отдых'],['wash','мыть','Wash your hands.','чистота'],['cook','готовить','Cook dinner.','еда'],['clean','убирать','Clean the house.','порядок'],
+    ['buy','купить','Buy groceries.','магазин'],['sell','продать','Sell the car.','сделка'],['pay','платить','Pay the bill.','деньги'],['call','звонить','Call me later.','телефон'],['wait','ждать','Wait here.','терпение'],
+    ['walk','идти пешком','Walk to work.','движение'],['drive','ехать за рулём','Drive carefully.','машина'],['read','читать','Read a book.','знания'],['write','писать','Write a letter.','текст'],['listen','слушать','Listen carefully.','слух'],
+    // Цвета
+    ['blue','синий','Blue sky.','цвет'],['yellow','жёлтый','Yellow sun.','цвет'],['black','чёрный','Black cat.','цвет'],['white','белый','White snow.','цвет'],['orange','оранжевый','Orange fruit.','цвет'],
+    ['purple','фиолетовый','Purple flower.','цвет'],['pink','розовый','Pink dress.','цвет'],['brown','коричневый','Brown bear.','цвет'],['grey','серый','Grey sky.','цвет'],['gold','золотой','Gold ring.','цвет/металл'],
+    // Числа и время
+    ['morning','утро','Good morning.','время суток'],['afternoon','день','In the afternoon.','время суток'],['evening','вечер','Good evening.','время суток'],['today','сегодня','Do it today.','время'],['tomorrow','завтра','See you tomorrow.','время'],
+    ['yesterday','вчера','It was yesterday.','время'],['week','неделя','Next week.','время'],['month','месяц','This month.','время'],['year','год','New year.','время'],['hour','час','One hour.','время'],
+    ['minute','минута','One minute.','время'],['second','секунда','One second.','время'],['early','рано','Wake up early.','время'],['late','поздно','Arrive late.','время'],['always','всегда','Always be kind.','частота'],
+    ['never','никогда','Never give up.','частота'],['often','часто','I often cook.','частота'],['sometimes','иногда','Sometimes I run.','частота'],['now','сейчас','Do it now.','время'],['soon','скоро','Coming soon.','время'],
+    // Прилагательные базовые
+    ['good','хороший','Good job.','оценка'],['bad','плохой','Bad news.','оценка'],['new','новый','New phone.','состояние'],['old','старый','Old house.','состояние'],['hot','горячий','Hot coffee.','температура'],
+    ['cold','холодный','Cold water.','температура'],['warm','тёплый','Warm coat.','температура'],['fast','быстрый','Fast car.','скорость'],['slow','медленный','Slow train.','скорость'],['easy','лёгкий','Easy task.','сложность'],
+    ['hard','трудный','Hard work.','сложность'],['clean','чистый','Clean hands.','состояние'],['dirty','грязный','Dirty shoes.','состояние'],['loud','громкий','Loud music.','звук'],['quiet','тихий','Quiet room.','звук'],
+    ['rich','богатый','Rich family.','достаток'],['poor','бедный','Poor village.','достаток'],['full','полный','Full stomach.','наполненность'],['empty','пустой','Empty cup.','наполненность'],['safe','безопасный','Safe road.','риск'],
+    // Профессии
+    ['doctor','врач','See a doctor.','профессия'],['teacher','учитель','My teacher.','профессия'],['driver','водитель','Bus driver.','профессия'],['cook','повар','Good cook.','профессия'],['farmer','фермер','Local farmer.','профессия'],
+    ['soldier','солдат','Young soldier.','профессия'],['artist','художник','Talented artist.','профессия'],['singer','певец','Famous singer.','профессия'],['actor','актёр','Famous actor.','профессия'],['writer','писатель','Great writer.','профессия'],
+    // Животные
+    ['horse','лошадь','Fast horse.','животное'],['cow','корова','Brown cow.','животное'],['pig','свинья','Pink pig.','животное'],['sheep','овца','White sheep.','животное'],['bird','птица','Small bird.','животное'],
+    ['fish','рыба','Big fish.','животное'],['bear','медведь','Brown bear.','животное'],['wolf','волк','Grey wolf.','животное'],['fox','лиса','Red fox.','животное'],['rabbit','кролик','White rabbit.','животное'],
+    ['mouse','мышь','Small mouse.','животное'],['snake','змея','Long snake.','животное'],['lion','лев','Strong lion.','животное'],['tiger','тигр','Orange tiger.','животное'],['elephant','слон','Big elephant.','животное'],
+    // Танцы
+    ['dance','танцевать','I love to dance.','движение под музыку'],['rhythm','ритм','Feel the rhythm.','основа танца'],['beat','бит','Follow the beat.','такт музыки'],['step','шаг','Learn the steps.','движение'],['move','двигаться','Move to the music.','движение'],
+    ['partner','партнёр','Dance partner.','с кем танцуют'],['stage','сцена','On the stage.','выступление'],['music','музыка','Dance to music.','звук'],['body','тело','Use your body.','физическое'],['balance','баланс','Keep your balance.','устойчивость'],
   ],
   '2':[
     ['weather','погода','Nice weather.','климат'],['believe','верить','I believe.','доверять'],['already','уже','Already done.','к моменту'],['different','различный','They differ.','не одинаковый'],['important','важный','Very important.','значение'],
@@ -58,7 +111,34 @@ const LEVELS={
     ['recipe','рецепт','Follow the recipe.','готовка'],['ingredient','ингредиент','Key ingredient.','состав блюда'],['menu','меню','Check the menu.','ресторан'],['delicious','вкусный','So delicious!','объедение'],['spicy','острый','Too spicy.','жгучий'],
     ['flavour','вкус','Rich flavour.','ощущение'],['portion','порция','Large portion.','сколько еды'],['appetite','аппетит','Good appetite.','хотеть есть'],['dessert','десерт','Order dessert.','сладкое'],['vegetarian','вегетарианский','Vegetarian option.','без мяса'],
     ['anxious','тревожный','Feeling anxious.','беспокойство'],['excited','взволнованный','I am excited.','предвкушение'],['frustrated','расстроенный','Feeling frustrated.','раздражение'],['grateful','благодарный','I am grateful.','признательность'],['confident','уверенный','Feel confident.','вера в себя'],
-    ['disappointed','разочарованный','Felt disappointed.','ожидания не оправдались'],['relieved','облегчённый','Felt relieved.','тревога прошла'],['nervous','нервный','Getting nervous.','перед чем-то'],['jealous','ревнивый','Feeling jealous.','зависть'],['ashamed','стыдящийся','Felt ashamed.','стыд'],
+    ['disappointed','разочарованный','Felt disappointed.','ожидания не оправдались'],['relieved','облегчённый','Felt relieved.','тревога прошла'],['nervous','нервный','Getting nervous.','перед чем-то'],    ['jealous','ревнивый','Feeling jealous.','зависть'],['ashamed','стыдящийся','Felt ashamed.','стыд'],
+    // Tanцы расширение (Level 2)
+    ['choreography','хореография','Learn the choreography.','постановка танца'],['performance','выступление','Great performance.','показ публике'],['rehearsal','репетиция','Daily rehearsal.','подготовка'],['routine','хореографическая связка','Practice your routine.','последовательность движений'],
+    ['posture','осанка','Good posture matters.','положение тела'],['flexibility','гибкость','Improve flexibility.','подвижность'],['coordination','координация','Need good coordination.','согласованность движений'],['expression','выразительность','Dance with expression.','передача чувств'],
+    ['solo','соло','Perform a solo.','один танцор'],['duo','дуэт','Dance a duo.','два танцора'],['ensemble','ансамбль','Join the ensemble.','группа танцоров'],['instructor','инструктор','Dance instructor.','тот кто учит'],
+    ['salsa','сальса','Dance the salsa.','латинский танец'],['tango','танго','Argentine tango.','страстный танец'],['waltz','вальс','Classic waltz.','бальный танец'],['hip-hop','хип-хоп','Hip-hop style.','уличный стиль'],['ballet','балет','Classical ballet.','классический танец'],
+    ['jazz dance','джаз-танец','Jazz dance class.','джазовый стиль'],['contemporary','контемпорари','Contemporary dance.','современный танец'],['swing','свинг','Swing dancing.','джазовый парный танец'],
+    // Спорт и активность
+    ['gym','спортзал','Go to the gym.','тренировки'],['exercise','упражнение','Daily exercise.','физическая активность'],['workout','тренировка','Morning workout.','занятие спортом'],['team','команда','Our team won.','группа игроков'],['match','матч','Watch the match.','соревнование'],
+    ['score','счёт','What\'s the score?','результат'],['win','выигрывать','We will win.','победа'],['lose','проигрывать','Don\'t lose hope.','поражение'],['practice','тренироваться','Practice every day.','повторять'],['athlete','спортсмен','Professional athlete.','занимается спортом'],
+    // Технологии повседневные
+    ['phone','телефон','My phone died.','устройство'],['screen','экран','Bright screen.','дисплей'],['battery','батарея','Low battery.','энергия'],['charger','зарядка','Need a charger.','питание'],['wifi','вайфай','Connect to wifi.','интернет'],
+    ['app','приложение','Download the app.','программа'],['photo','фото','Take a photo.','снимок'],['video','видео','Watch a video.','запись'],['message','сообщение','Send a message.','текст'],['email','электронная почта','Check your email.','интернет-письмо'],
+    // Чувства и состояния
+    ['tired','усталый','Feeling tired.','нет сил'],['hungry','голодный','I am hungry.','хочу есть'],['thirsty','хочу пить','I am thirsty.','нет воды'],['bored','скучающий','Feeling bored.','нечего делать'],['surprised','удивлённый','I am surprised.','не ожидал'],
+    ['scared','напуганный','Feeling scared.','страх'],['angry','злой','Don\'t get angry.','гнев'],['sad','грустный','Feeling sad.','печаль'],['lonely','одинокий','Feeling lonely.','без компании'],['proud','гордый','Feeling proud.','гордость'],
+    // Покупки и деньги
+    ['price','цена','What\'s the price?','сколько стоит'],['cheap','дешёвый','Very cheap.','низкая цена'],['expensive','дорогой','Too expensive.','высокая цена'],['sale','скидка/распродажа','On sale now.','снижение цены'],['cash','наличные','Pay in cash.','бумажные деньги'],
+    ['card','карта','Pay by card.','банковская карта'],['receipt','чек','Keep the receipt.','подтверждение покупки'],['change','сдача','Keep the change.','монеты назад'],['cost','стоить','How much does it cost?','цена чего-либо'],['afford','позволить себе','Can\'t afford it.','хватает ли денег'],
+    // Еда в ресторане
+    ['order','заказывать','Order your food.','в ресторане'],['waiter','официант','Call the waiter.','обслуживает столик'],['bill','счёт','Ask for the bill.','платёжный документ'],['tip','чаевые','Leave a tip.','благодарность за обслуживание'],['reservation','бронирование','Make a reservation.','заказать стол заранее'],
+    ['starter','закуска','Order a starter.','первое блюдо'],['main course','основное блюдо','Choose a main course.','главное в меню'],['takeaway','еда на вынос','Get a takeaway.','еда домой'],['delivery','доставка','Order delivery.','привезут домой'],
+    // Путешествия расширение
+    ['map','карта','Check the map.','ориентирование'],['guide','гид','Hire a guide.','показывает место'],['tour','тур','City tour.','экскурсия'],['souvenir','сувенир','Buy a souvenir.','память о месте'],['suitcase','чемодан','Pack a suitcase.','для вещей'],
+    ['visa','виза','Apply for visa.','разрешение на въезд'],['border','граница','Cross the border.','между странами'],['journey','путешествие','Long journey.','поездка'],['adventure','приключение','Great adventure.','интересный опыт'],['explore','исследовать','Explore the city.','изучать новое'],
+    // Дом расширение
+    ['garden','сад','Water the garden.','около дома'],['garage','гараж','Park in the garage.','для машины'],['basement','подвал','In the basement.','под домом'],['roof','крыша','Fix the roof.','над домом'],['fence','забор','Build a fence.','ограждение'],
+    ['landlord','хозяин жилья','Call the landlord.','владелец квартиры'],['tenant','арендатор','New tenant.','снимает жильё'],['rent','аренда','Pay the rent.','плата за жильё'],['mortgage','ипотека','Pay the mortgage.','кредит на дом'],['furniture','мебель','Buy furniture.','предметы интерьера'],
   ],
   '3':[
     ['accomplish','достигать','Accomplish the goal.','выполнить'],['consequence','последствие','Actions have consequences.','результат'],['acquire','приобретать','Acquire new skills.','получить'],['anticipate','предвидеть','Anticipate demand.','ожидать'],
