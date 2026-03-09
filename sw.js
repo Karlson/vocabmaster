@@ -1,6 +1,5 @@
-// VocabMaster Service Worker
-// Обновляй CACHE_NAME при каждом новом деплое чтобы браузер подхватил изменения
-const CACHE_NAME = 'vocabmaster-v5';
+const CACHE = 'vocabmaster-v6';
+const URLS = ['./', './index.html', './manifest.json'];
 
 const PRECACHE = [
   './',

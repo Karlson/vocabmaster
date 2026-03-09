@@ -1070,30 +1070,11 @@ function StoryScreen({progress,settings,showToast,onBack}){
     }catch(e){showToast('Ошибка: '+e.message,'#ef4444');}
     finally{setLoading(false);}
   }
-  const rendered=useMemo(()=>story.replace(/\*\*(.+?)\*\*/g,'<strong style="color:#818cf8;text-decoration:underline">$1</strong>'),[story]);
-  return html`<div style="min-height:100vh;background:#0f172a;padding:72px 16px 24px;max-width:420px;margin:0 auto" class="su">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <button onClick=${onBack} style="background:none;border:none;color:#64748b;font-size:22px">←</button>
-      <h2 style="margin:0;font-size:20px;font-weight:700">AI История</h2>
-    </div>
-    <p style="color:#64748b;font-size:13px;margin-bottom:14px">Слов в изучении: <strong style="color:#818cf8">${learning.length}</strong></p>
-    <${Btn} onClick=${gen} disabled=${loading} color=${loading?undefined:'linear-gradient(135deg,#6366f1,#8b5cf6)'} style="margin-bottom:14px">
-      ${loading?'⏳ Генерирую...':'✨ Создать историю'}
-    </${Btn}>
-    ${words.length>0&&html`<div style="background:#1e293b;border-radius:14px;padding:13px;margin-bottom:14px">
-      <div style="font-size:11px;color:#64748b;margin-bottom:7px">Слова:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        ${words.map(w=>html`<span key=${w} style="background:#312e81;color:#a5b4fc;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">${w}</span>`)}
-      </div>
-    </div>`}
-    ${story&&html`<div style="background:#1e293b;border-radius:16px;padding:18px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <span style="font-weight:700">История</span>
-        <button onClick=${()=>speak(story.replace(/\*\*/g,''))} style="background:none;border:none;color:#6366f1;font-size:22px">🔊</button>
-      </div>
-      <div style="color:#e2e8f0;line-height:1.8;font-size:14px" dangerouslySetInnerHTML=${{__html:rendered}}></div>
-    </div>`}
-  </div>`;
+  onboard.done=true;onboard.suggestedLevel=suggestedLevel;
+  onboard.byLv=byLv;
+  save('vm2_onboarded',true);
+  save('vm2_onboard_level',suggestedLevel);
+  render();
 }
 
 function SettingsScreen({settings,onSave,showToast,onBack}){
